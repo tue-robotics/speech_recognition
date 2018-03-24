@@ -61,8 +61,8 @@ sudo apt-get update
 log "Update complete"
 sudo apt-get upgrade -y
 log "Upgrade complete"
-sudo apt-get install -y postgresql postgresql-contrib php build-essential python3-scipy python3-psycopg2 ipython3 sox php-pgsql zip festival git aptitude dphys-swapfile
-log "Installation of packages 'postgresql postgresql-contrib php build-essential python3-scipy python3-psycopg2 ipython3 sox php-pgsql zip festival git aptitude dphys-swapfile' complete"
+sudo apt-get install -y postgresql postgresql-contrib build-essential python3-scipy python3-psycopg2 ipython3 sox zip festival git aptitude dphys-swapfile
+log "Installation of packages 'postgresql postgresql-contrib build-essential python3-scipy python3-psycopg2 ipython3 sox zip festival git aptitude dphys-swapfile' complete"
 
 # Kaldi: Installation/Update
 kaldi_install()
@@ -71,7 +71,7 @@ kaldi_install()
 	if [ ! -d "$KALDI" ]; then
 		log "No existing installation found. Initiating installation..."
 		log "Cloning repository from GitHub"
-		git clone https://github.com/kaldi-ASR_HOME/kaldi.git
+		git clone https://github.com/kaldi-asr/kaldi.git $KALDI
 		sed -i "s|exit|return|g" $KALDI/tools/extras/check_dependencies.sh
 		source $KALDI/tools/extras/check_dependencies.sh
 		sed -i "s|return|exit|g" $KALDI/tools/extras/check_dependencies.sh
@@ -101,25 +101,30 @@ kaldi_install()
 
 kaldi_update()
 {
-	echo "$(date "+%Y-%m-%d %H:%M:%S"): Kaldi update procedure initiated" >> $log_file
 	if [ ! -d "$KALDI" ]; then
 		kaldi_install
 	else
-		cd $KALDI
-		echo "$(date "+%Y-%m-%d %H:%M:%S"): Updating repository from GitHub" >> $log_file
-		git pull
-		cd tools
-		echo "$(date "+%Y-%m-%d %H:%M:%S"): Cleaning existing make" >> $log_file
-		make distclean
-		echo "$(date "+%Y-%m-%d %H:%M:%S"): Building toolkit" >> $log_file
-		make -j 4
-		extras/install_irstlm.sh
-		cd ../src
-		make distclean
-		./configure --shared
-		make depend -j 4
-		make -j 4
-		echo "$(date "+%Y-%m-%d %H:%M:%S"): Kaldi update successful" >> $log_file
+		kaldi_install_status="$(cat $KALDI/STATUS)"
+		if [ "$kaldi_install_status" = "ALL OK" ]; then
+			cd $KALDI
+			log "Updating repository from GitHub"
+			git pull
+			cd tools
+			log "Cleaning existing make"
+			make distclean
+			log "Building toolkit"
+			make -j 4
+			extras/install_irstlm.sh
+			cd ../src
+			make distclean
+			./configure --shared
+			make depend -j 4
+			make -j 4
+			log "Kaldi-ASR update complete"
+		else
+			sudo rm -rf $KALDI
+			kaldi_install
+		fi
 	fi
 }
 
