@@ -1,2 +1,5 @@
-log
-/digits/
+# ignore all log directories
+**/log
+
+# ignore the digits directory in egs
+egs/digits
