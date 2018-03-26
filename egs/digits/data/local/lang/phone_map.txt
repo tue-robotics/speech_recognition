@@ -1,0 +1,22 @@
+sil sil sil_B sil_E sil_I sil_S 
+a a_B a_E a_I a_S 
+aa aa_B aa_E aa_I aa_S 
+aan aan_B aan_E aan_I aan_S 
+c c_B c_E c_I c_S 
+ch ch_B ch_E ch_I ch_S 
+d d_B d_E d_I d_S 
+ee ee_B ee_E ee_I ee_S 
+h h_B h_E h_I h_S 
+ii ii_B ii_E ii_I ii_S 
+k k_B k_E k_I k_S 
+n n_B n_E n_I n_S 
+o o_B o_E o_I o_S 
+ou ou_B ou_E ou_I ou_S 
+p p_B p_E p_I p_S 
+r r_B r_E r_I r_S 
+s s_B s_E s_I s_S 
+sh sh_B sh_E sh_I sh_S 
+t t_B t_E t_I t_S 
+txh txh_B txh_E txh_I txh_S 
+uu uu_B uu_E uu_I uu_S 
+y y_B y_E y_I y_S 
