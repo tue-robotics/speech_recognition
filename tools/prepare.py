@@ -4,6 +4,8 @@ required by Kaldi-ASR to develop Acoustic Models."""
 
 import os
 
+def spk2gender():
+
 def text(root_dir):
     """Prepares the file 'text' """
     if root_dir[-1] != '/':
