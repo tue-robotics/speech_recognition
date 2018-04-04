@@ -138,33 +138,60 @@ class DataPreparation:
             csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
             row = next(csv_reader)
 
-            # The for loop is not going to work! Rewrite it
+            iterations = self.WAV_FILES
+            out = ''
 
-            for row in csv_reader:
+            # First speaker is not a new speaker
+            newSpeaker = False
+
+            while iterations:
                 utterance = 1
-                sid = row[self.INDEX.SPEAKER_ID]
-                transcription = row[self.INDEX.TRANSCRIPTION]
+                if not newSpeaker:
+                    row = next(csv_reader)
 
-                column1 = sid + 'U' + str(utterance)
-                column2 = transcription
-
-                out = column1 + '\t' + column2 + '\n'
+                    sid = row[self.INDEX.SPEAKER_ID]
+                    transcription = row[self.INDEX.TRANSCRIPTION]
 
 
-        text_dir = root_dir + 'txt/'
-        text_contents = os.listdir(text_dir)
-        text_contents.sort()
-        out = ''
-        for text_file in text_contents:
-            out += text_file.split('.')[0] + '\t'
-            fname = open(text_dir + text_file, 'r')
-            fname_full = fname.read()
-            out += fname_full + '\n'
-            fname.close()
+                    column1 = sid + 'U' + str(utterance)
+                    column2 = transcription
+
+                    out += column1 + '\t' + column2 + '\n'
+                    iterations -= 1
+                    utterance += 1
+
+                else:
+                    sid = row[self.INDEX.SPEAKER_ID]
+                    transcription = row[self.INDEX.TRANSCRIPTION]
+
+                    column1 = sid + 'U' + str(utterance)
+                    column2 = transcription
+
+                    out += column1 + '\t' + column2 + '\n'
+                    iterations -= 1
+                    utterance += 1
+                    newSpeaker = False
+
+                while not newSpeaker:
+                    row = next(csv_reader)
+                    if row[self.INDEX.SPEAKER_ID] != sid:
+                        newSpeaker = True
+                        break
+
+                    sid = row[self.INDEX.SPEAKER_ID]
+                    transcription = row[self.INDEX.TRANSCRIPTION]
+
+                    column1 = sid + 'U' + str(utterance)
+                    column2 = transcription
+
+                    out += column1 + '\t' + column2 + '\n'
+                    iterations -= 1
+                    utterance += 1
+
+        # The output file must not end with a newline                
         out = out[:-1]
-        tfname = open(root_dir + 'text', 'w')
-        tfname.write(out)
-        tfname.close()
+        with open(<put_file_path>) as out_file:
+            out_file.write(out)
 
 def spk2gender(root_dir):
     """Prepares the file 'spk2gender'"""
