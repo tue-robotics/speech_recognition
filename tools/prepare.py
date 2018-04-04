@@ -172,7 +172,7 @@ class DataPreparation:
                     utterance += 1
                     newSpeaker = False
 
-                while not newSpeaker:
+                while (not newSpeaker) and iterations:
                     row = next(csv_reader)
                     if row[self.INDEX.SPEAKER_ID] != sid:
                         newSpeaker = True
@@ -188,7 +188,7 @@ class DataPreparation:
                     iterations -= 1
                     utterance += 1
 
-        # The output file must not end with a newline                
+        # The output file must not end with a newline
         out = out[:-1]
         with open(<put_file_path>) as out_file:
             out_file.write(out)
