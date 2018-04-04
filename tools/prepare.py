@@ -16,11 +16,21 @@ class DataPreparation:
     """
     def __init__(self, csv_path, srs_path):
         """ DataPreparation class constructor """
+
+        file_extension = csv_path.split('.')[-1]
+        if file_extension != 'csv':
+            sys.exit("File type not '.csv'")
+
         if !os.path.exists(csv_path):
             sys.exit("Invalid CSV path")
 
         self.CSV_PATH = csv_path
         self.DATA_ROOT = os.path.dirname(csv_path)
+        self.csvCheck
+
+        # Return the exact error
+        if !self.FLAG.CSV_CHECK:
+            sys.exit("CSV check failed")
 
         if srs_path[-1] == '/':
             srs_path = srs_path[:-1]
@@ -29,6 +39,7 @@ class DataPreparation:
             sys.exit("Invalid path to Speech Recognition System root")
 
         self.SRS_PATH = srs_path
+
 
     def csvCheck(self):
         """csvCheck performs the preliminary checks before the construction of
@@ -56,40 +67,89 @@ class DataPreparation:
             self.CSV_HEADER = next(csv_reader)
 
             try:
-                wav_path_index = self.CSV_HEADER.index("WAV_PATH")
-                transcription_index = self.CSV_HEADER.index("TRANSCRIPTION")
+                self.INDEX.WAV_PATH = self.CSV_HEADER.index("WAV_PATH")
+                self.INDEX.TRANSCRIPTION = self.CSV_HEADER.index("TRANSCRIPTION")
+                self.INDEX.GENDER = self.CSV_HEADER.index("GENDER")
+                self.INDEX.SPEAKER_ID = self.CSV_HEADER.index("SPEAKER_ID")
             except:
                 self.FLAG.CSV_HEADER = False
+                self.FLAG.CSV_CHECK = False
                 return
             else:
                 self.FLAG.CSV_HEADER = True
 
             wav_files = 0
             transcriptions = 0
+            gender_count = 0
+            speaker_count = 0
+
             for row in csv_reader:
-                wav_rel_path = row[wav_path_index]
+                wav_rel_path = row[self.INDEX.WAV_PATH]
                 wav_path = self.DATA_ROOT + '/' + wav_rel_path
                 if !os.path.exists(wav_path):
                     self.FLAG.WAV_PATH = False
+                    self.FLAG.CSV_CHECK = False
                     return
-
                 wav_files += 1
-                if row[transcription_index] != '':
+
+                if row[self.INDEX.TRANSCRIPTION] != '':
                     transcriptions += 1
 
+                if row[self.INDEX.GENDER] != '':
+                    gender_count += 1
+
+                if row[self.INDEX.SPEAKER_ID] != '':
+                    speaker_count += 1
+
             self.FLAG.WAV_PATH = True
+
             self.WAV_FILES = wav_files
             self.TRANSCRIPTIONS = transcriptions
+            self.GENDER_COUNT = gender_count
+            self.SPEAKER_COUNT = speaker_count
 
             if self.TRANSCRIPTIONS != self.WAV_FILES:
+                self.FLAG.TRANSCRIPTION = False
                 self.FLAG.CSV_CHECK = False
+                return
+            else:
+                self.FLAG.TRANSCRIPTION = True
+
+            if self.GENDER_COUNT != self.WAV_FILES:
+                self.FLAG.GENDER = False
+                self.FLAG.CSV_CHECK = False
+                return
+            else:
+                self.FLAG.GENDER = True
+
+            if self.SPEAKER_COUNT != self.WAV_FILES:
+                self.FLAG.SPEAKER_ID = False
+                self.FLAG.CSV_CHECK = False
+                return
+            else:
+                self.FLAG.SPEAKER_ID = True
 
             self.FLAG.CSV_CHECK = True
 
     def text(self):
         """Prepares the file 'text' """
-        if root_dir[-1] != '/':
-            root_dir += '/'
+
+        with open(self.CSV_PATH, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
+            row = next(csv_reader)
+
+            # The for loop is not going to work! Rewrite it
+
+            for row in csv_reader:
+                utterance = 1
+                sid = row[self.INDEX.SPEAKER_ID]
+                transcription = row[self.INDEX.TRANSCRIPTION]
+
+                column1 = sid + 'U' + str(utterance)
+                column2 = transcription
+
+                out = column1 + '\t' + column2 + '\n'
+
 
         text_dir = root_dir + 'txt/'
         text_contents = os.listdir(text_dir)
@@ -105,8 +165,6 @@ class DataPreparation:
         tfname = open(root_dir + 'text', 'w')
         tfname.write(out)
         tfname.close()
-
-
 
 def spk2gender(root_dir):
     """Prepares the file 'spk2gender'"""
@@ -161,3 +219,7 @@ def spk2utt(root_dir):
     spkfname = open(root_dir + 'spk2utt', 'w')
     spkfname.write(out)
     spkfname.close()
+
+# Add the main() subroutine
+if __name__ == '__main__':
+    main()
