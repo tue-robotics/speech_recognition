@@ -1,6 +1,14 @@
 SRS_PATH_DIR_DATA#!/usr/bin/env python3
 """This module has been written to prepare the files and directory structure
-required by Kaldi-ASR to develop Acoustic Models."""
+required by Kaldi-ASR to develop Acoustic Models.
+
+Structure of the CSV file:
+
+-----------------------------------------------------------------
+| SPEAKER_ID | UTTERANCE_ID | WAV_PATH | TRANSCRIPTION | GENDER |
+-----------------------------------------------------------------
+
+"""
 
 import os
 import sys
@@ -75,6 +83,7 @@ class DataPreparation:
                 b. WAV_PATH         (relative to the CSV file)
                 c. TRANSCRIPTION
                 d. GENDER
+                e. UTTERANCE_ID
             4. Read every row of the CSV file and check if all the wav paths exist
             5. Check whether number of wav files and transcriptions are equal
         """
@@ -93,6 +102,8 @@ class DataPreparation:
                 self.INDEX.TRANSCRIPTION = self.CSV_HEADER.index("TRANSCRIPTION")
                 self.INDEX.GENDER = self.CSV_HEADER.index("GENDER")
                 self.INDEX.SPEAKER_ID = self.CSV_HEADER.index("SPEAKER_ID")
+                self.INDEX.UTTERANCE_ID = self.CSV_HEADER.index("UTTERANCE_ID")
+
             except:
                 self.FLAG.CSV_HEADER = False
                 self.FLAG.CSV_CHECK = False
@@ -104,6 +115,7 @@ class DataPreparation:
             transcriptions = 0
             gender_count = 0
             speaker_count = 0
+            utterance_count = 0
 
             for row in csv_reader:
                 wav_rel_path = row[self.INDEX.WAV_PATH]
@@ -123,12 +135,16 @@ class DataPreparation:
                 if row[self.INDEX.SPEAKER_ID] != '':
                     speaker_count += 1
 
+                if row[self.INDEX.UTTERANCE_ID] != '':
+                    utterance_count += 1
+
             self.FLAG.WAV_PATH = True
 
             self.WAV_FILES = wav_files
             self.TRANSCRIPTIONS = transcriptions
             self.GENDER_COUNT = gender_count
             self.SPEAKER_COUNT = speaker_count
+            self.UTTERANCE_COUNT = utterance_count
 
             if self.TRANSCRIPTIONS != self.WAV_FILES:
                 self.FLAG.TRANSCRIPTION = False
@@ -151,6 +167,13 @@ class DataPreparation:
             else:
                 self.FLAG.SPEAKER_ID = True
 
+            if self.UTTERANCE_COUNT != self.WAV_FILES:
+                self.FLAG.UTTERANCE_ID = False
+                self.FLAG.CSV_CHECK = False
+                return
+            else:
+                self.FLAG.UTTERANCE_ID = True
+
             self.FLAG.CSV_CHECK = True
 
     def text(self):
@@ -163,52 +186,18 @@ class DataPreparation:
             iterations = self.WAV_FILES
             out = ''
 
-            # First speaker is not a new speaker
-            newSpeaker = False
-
             while iterations:
-                utterance = 1
-                if not newSpeaker:
-                    row = next(csv_reader)
+                row = next(csv_reader)
 
-                    sid = row[self.INDEX.SPEAKER_ID]
-                    transcription = row[self.INDEX.TRANSCRIPTION]
+                sid = row[self.INDEX.SPEAKER_ID]
+                uid = row[self.INDEX.UTTERANCE_ID]
+                transcription = row[self.INDEX.TRANSCRIPTION]
 
+                column1 = sid + 'U' + str(uid)
+                column2 = transcription
 
-                    column1 = sid + 'U' + str(utterance)
-                    column2 = transcription
-
-                    out += column1 + '\t' + column2 + '\n'
-                    iterations -= 1
-                    utterance += 1
-
-                else:
-                    sid = row[self.INDEX.SPEAKER_ID]
-                    transcription = row[self.INDEX.TRANSCRIPTION]
-
-                    column1 = sid + 'U' + str(utterance)
-                    column2 = transcription
-
-                    out += column1 + '\t' + column2 + '\n'
-                    iterations -= 1
-                    utterance += 1
-                    newSpeaker = False
-
-                while (not newSpeaker) and iterations:
-                    row = next(csv_reader)
-                    if row[self.INDEX.SPEAKER_ID] != sid:
-                        newSpeaker = True
-                        break
-
-                    sid = row[self.INDEX.SPEAKER_ID]
-                    transcription = row[self.INDEX.TRANSCRIPTION]
-
-                    column1 = sid + 'U' + str(utterance)
-                    column2 = transcription
-
-                    out += column1 + '\t' + column2 + '\n'
-                    iterations -= 1
-                    utterance += 1
+                out += column1 + '\t' + column2 + '\n'
+                iterations -= 1
 
         # The output file must not end with a newline
         out = out[:-1]
@@ -254,23 +243,29 @@ class DataPreparation:
         # The output file must not end with a newline
         out = out[:-1]
         with open(self.SRS_PATH_DATA_DATASET + '/spk2gender') as out_file:
-            out_file.write(out)                    
+            out_file.write(out)
+
+    def wavscp(self):
+        """Prepares the file 'wav.scp' """
+        with open(self.CSV_PATH, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
+            row = next(csv_reader)
+
+            iterations = self.WAV_FILES
+            out = ''
 
 
-def wavscp(root_dir):
-    """Prepares the file 'wav.scp' """
-    if root_dir[-1] != '/':
-        root_dir += '/'
-    wav_dir = root_dir + 'wav/'
-    wav_contents = os.listdir(wav_dir)
-    wav_contents.sort()
-    out = ''
-    for wav_file in wav_contents:
-        out += wav_file.split('.')[0] + '\t' + wav_dir + wav_file + '\n'
-    out = out[:-1]
-    wfname = open(root_dir + 'wav.scp', 'w')
-    wfname.write(out)
-    wfname.close()
+
+        wav_dir = root_dir + 'wav/'
+        wav_contents = os.listdir(wav_dir)
+        wav_contents.sort()
+        out = ''
+        for wav_file in wav_contents:
+            out += wav_file.split('.')[0] + '\t' + wav_dir + wav_file + '\n'
+        out = out[:-1]
+        wfname = open(root_dir + 'wav.scp', 'w')
+        wfname.write(out)
+        wfname.close()
 
 def utt2spk(root_dir):
     """Prepares the file 'utt2spk' """
