@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+SRS_PATH_DIR_DATA#!/usr/bin/env python3
 """This module has been written to prepare the files and directory structure
 required by Kaldi-ASR to develop Acoustic Models."""
 
@@ -42,21 +42,21 @@ class DataPreparation:
 
         # This section maybe buggy
         self.SRS_PATH = srs_path
-        self.SRS_DATA_PATH = self.SRS_PATH + "/data"
-        self.DATA_SET = dataSet
+        self.SRS_PATH_DATA = self.SRS_PATH + "/data"
+        self.SRS_PATH_DATA_DATASET = self.SRS_PATH_DATA + "/" + dataSet
 
-        if os.path.exists(self.SRS_DATA_PATH):
-            data_dir_contents = os.listdir(self.SRS_DATA_PATH)
+        if os.path.exists(self.SRS_PATH_DATA):
+            data_dir_contents = os.listdir(self.SRS_PATH_DATA)
             if data_dir_contents == []:
-                os.mkdir(self.SRS_DATA_PATH + "/" + self.DATA_SET)
+                os.mkdir(self.SRS_PATH_DATA_DATASET)
             else:
                 data_dir_contents.remove('test')
                 for directory in data_dir_contents:
-                    shutil.rmtree(self.SRS_DATA_PATH + "/" + directory)
-                os.mkdir(self.SRS_DATA_PATH + "/" + self.DATA_SET)
+                    shutil.rmtree(self.SRS_PATH_DATA + "/" + directory)
+                os.mkdir(self.SRS_PATH_DATA_DATASET)
         else:
-            os.mkdir(self.SRS_DATA_PATH)
-            os.mkdir(self.SRS_DATA_PATH + "/" + self.DATA_SET)
+            os.mkdir(self.SRS_PATH_DATA)
+            os.mkdir(self.SRS_PATH_DATA_DATASET)
 
         self.text
         self.spk2gender
@@ -212,11 +212,50 @@ class DataPreparation:
 
         # The output file must not end with a newline
         out = out[:-1]
-        with open(<put_file_path>) as out_file:
+        with open(self.SRS_PATH_DATA_DATASET + '/text') as out_file:
             out_file.write(out)
 
-def spk2gender(root_dir):
-    """Prepares the file 'spk2gender'"""
+    def spk2gender(self):
+        """Prepares the file 'spk2gender'"""
+        with open(self.CSV_PATH, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
+            row = next(csv_reader)
+
+            iterations = self.WAV_FILES
+            out = ''
+
+            # First speaker is not a new speaker
+            row = next(csv_reader)
+            sid = row[self.INDEX.SPEAKER_ID]
+            gender = row[self.INDEX.GENDER]
+            out += sid + '\t' + gender + '\n'
+            iterations -= 1
+            newSpeaker = False
+
+            while iterations:
+                if newSpeaker:
+
+                    sid = row[self.INDEX.SPEAKER_ID]
+                    gender = row[self.INDEX.GENDER]
+
+                    out += sid + '\t' + gender + '\n'
+                    iterations -= 1
+                    newSpeaker = False
+
+                else:
+                    row = next(csv_reader)
+
+                    if row[self.INDEX.SPEAKER_ID] == sid:
+                        iterations -= 1
+                        continue
+                    else:
+                        newSpeaker = True
+
+        # The output file must not end with a newline
+        out = out[:-1]
+        with open(self.SRS_PATH_DATA_DATASET + '/spk2gender') as out_file:
+            out_file.write(out)                    
+
 
 def wavscp(root_dir):
     """Prepares the file 'wav.scp' """
