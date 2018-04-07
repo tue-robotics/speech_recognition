@@ -1,4 +1,4 @@
-SRS_PATH_DIR_DATA#!/usr/bin/env python3
+#!/usr/bin/env python3
 """This module has been written to prepare the files and directory structure
 required by Kaldi-ASR to develop Acoustic Models.
 
@@ -8,6 +8,14 @@ Structure of the CSV file:
 | SPEAKER_ID | UTTERANCE_ID | WAV_PATH | TRANSCRIPTION | GENDER |
 -----------------------------------------------------------------
 
+TODO:
+1. Analyse the best suited format for value of fields SPEAKER_ID and UTTERANCE_ID.
+   Change the following methods accordingly:
+        a. text
+        b. wav.scp
+        c. spk2utt
+        d. utt2spk
+2. Analyse the best suited naming structure for each FILE
 """
 
 import os
@@ -34,7 +42,7 @@ class DataPreparation:
             sys.exit("Invalid CSV path")
 
         self.CSV_PATH = csv_path
-        self.DATA_ROOT = os.path.dirname(csv_path)
+        self.CSV_DATA_ROOT = os.path.dirname(csv_path)
 
         self.csvCheck
 
@@ -119,7 +127,7 @@ class DataPreparation:
 
             for row in csv_reader:
                 wav_rel_path = row[self.INDEX.WAV_PATH]
-                wav_path = self.DATA_ROOT + '/' + wav_rel_path
+                wav_path = self.CSV_DATA_ROOT + '/' + wav_rel_path
                 if !os.path.exists(wav_path):
                     self.FLAG.WAV_PATH = False
                     self.FLAG.CSV_CHECK = False
@@ -203,7 +211,7 @@ class DataPreparation:
                 uid = row[self.INDEX.UTTERANCE_ID]
                 transcription = row[self.INDEX.TRANSCRIPTION]
 
-                fid = sid + 'U' + str(uid)
+                fid = sid + 'U' + str(uid).zfill(5)
 
                 out += fid + '\t' + transcription + '\n'
                 iterations -= 1
@@ -221,7 +229,7 @@ class DataPreparation:
         2. Read the first row (First Speaker) and extract the gender details
         3. Search for a new speaker and extract its gender details
         4. Write an output file where each line has the structure:
-            <SPEAKER_ID><Tab_space><TRANSCRIPTION>
+            <SPEAKER_ID><Tab_space><GENDER>
         """
         with open(self.CSV_PATH, 'r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
@@ -263,7 +271,19 @@ class DataPreparation:
             out_file.write(out)
 
     def wavscp(self):
-        """Prepares the file 'wav.scp' """
+        """wavscp prepares the file 'wav.scp' in the DATASET directory.
+
+        The following flow has been established:
+        1. Read the CSV file
+        2. From each row extract:
+            a. SPEAKER_ID
+            b. UTTERANCE_ID
+            c. WAV_PATH     (relative to the CSV file)
+        3. Make FILE_ID "<SPEAKER_ID>U<UTTERANCE_ID>"
+        4. Make FILE_PATH "<CSV_DATA_ROOT>/<WAV_PATH>"
+        5. Write an output file where each line has the structure:
+            <FILE_ID><Tab_space><FILE_PATH>
+        """
         with open(self.CSV_PATH, 'r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
             row = next(csv_reader)
@@ -271,18 +291,23 @@ class DataPreparation:
             iterations = self.WAV_FILES
             out = ''
 
+            while iterations:
+                row = next(csv_reader)
 
+                sid = row[self.INDEX.SPEAKER_ID]
+                uid = row[self.INDEX.UTTERANCE_ID]
+                wav_rel_path = row[self.INDEX.WAV_PATH]
 
-        wav_dir = root_dir + 'wav/'
-        wav_contents = os.listdir(wav_dir)
-        wav_contents.sort()
-        out = ''
-        for wav_file in wav_contents:
-            out += wav_file.split('.')[0] + '\t' + wav_dir + wav_file + '\n'
+                fid = sid + 'U' + str(uid).zfill(5)
+                fpath = self.CSV_DATA_ROOT + '/' + wav_rel_path
+
+                out += fid + '\t' + fpath + '\n'
+                iterations -= 1
+
+        # The output file must not end with a newline
         out = out[:-1]
-        wfname = open(root_dir + 'wav.scp', 'w')
-        wfname.write(out)
-        wfname.close()
+        with open(self.SRS_PATH_DATA_DATASET + '/wav.scp') as out_file:
+            out_file.write(out)
 
 def utt2spk(root_dir):
     """Prepares the file 'utt2spk' """
