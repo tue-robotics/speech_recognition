@@ -309,41 +309,60 @@ class DataPreparation:
         with open(self.SRS_PATH_DATA_DATASET + '/wav.scp') as out_file:
             out_file.write(out)
 
-def utt2spk(root_dir):
-    """Prepares the file 'utt2spk' """
-    if root_dir[-1] != '/':
-        root_dir += '/'
-    text_dir = root_dir + 'txt/'
-    text_contents = os.listdir(text_dir)
-    text_contents.sort()
-    out = ''
-    for text_file in text_contents:
-        fname = text_file.split('.')[0]
-        out += fname + '\t' + fname[:-4] + '\n'
-    out = out[:-1]
-    uttfname = open(root_dir + 'utt2spk', 'w')
-    uttfname.write(out)
-    uttfname.close()
+    def utt2spk(self):
+        """utt2spk prepares the file 'utt2spk' in the DATASET directory.
 
-def spk2utt(root_dir):
-    """Prepares the file 'spk2utt' """
-    if root_dir[-1] != '/':
-        root_dir += '/'
-    text_dir = root_dir + 'txt/'
-    text_contents = os.listdir(text_dir)
-    text_contents.sort()
-    spk_begin = (text_contents[0].split('.'))[0][:-4]
-    out = spk_begin
-    for text_file in text_contents:
-        fname = text_file.split('.')[0]
-        if fname[:-4] == spk_begin:
-            out += ' ' + fname
-        else:
-            spk_begin = fname[:-4]
-            out += '\n' + spk_begin + ' ' + fname
-    spkfname = open(root_dir + 'spk2utt', 'w')
-    spkfname.write(out)
-    spkfname.close()
+        The following flow has been established:
+        1. Read the CSV file
+        2. From each row extract:
+            a. SPEAKER_ID
+            b. UTTERANCE_ID
+        3. Make FILE_ID "<SPEAKER_ID>U<UTTERANCE_ID>"
+        4. Write an output file where each line has the structure:
+            <FILE_ID><Tab_space><SPEAKER_ID>
+        """
+        with open(self.CSV_PATH, 'r') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
+            row = next(csv_reader)
+
+            iterations = self.WAV_FILES
+            out = ''
+
+            while iterations:
+                row = next(csv_reader)
+
+                sid = row[self.INDEX.SPEAKER_ID]
+                uid = row[self.INDEX.UTTERANCE_ID]
+
+                fid = sid + 'U' + str(uid).zfill(5)
+
+                out += fid + '\t' + sid + '\n'
+                iterations -= 1
+
+        # The output file must not end with a newline
+        out = out[:-1]
+        with open(self.SRS_PATH_DATA_DATASET + '/utt2spk') as out_file:
+            out_file.write(out)
+
+    def spk2utt(root_dir):
+        """Prepares the file 'spk2utt' """
+        if root_dir[-1] != '/':
+            root_dir += '/'
+        text_dir = root_dir + 'txt/'
+        text_contents = os.listdir(text_dir)
+        text_contents.sort()
+        spk_begin = (text_contents[0].split('.'))[0][:-4]
+        out = spk_begin
+        for text_file in text_contents:
+            fname = text_file.split('.')[0]
+            if fname[:-4] == spk_begin:
+                out += ' ' + fname
+            else:
+                spk_begin = fname[:-4]
+                out += '\n' + spk_begin + ' ' + fname
+        spkfname = open(root_dir + 'spk2utt', 'w')
+        spkfname.write(out)
+        spkfname.close()
 
 # Add the main() subroutine
 if __name__ == '__main__':
