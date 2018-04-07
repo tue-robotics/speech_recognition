@@ -9,13 +9,14 @@ Structure of the CSV file:
 -----------------------------------------------------------------
 
 TODO:
-1. Analyse the best suited format for value of fields SPEAKER_ID and UTTERANCE_ID.
+1. Check correctness of file endings for each created data file
+2. Analyse the best suited format for value of fields SPEAKER_ID and UTTERANCE_ID.
    Change the following methods accordingly:
         a. text
         b. wav.scp
         c. spk2utt
         d. utt2spk
-2. Analyse the best suited naming structure for each FILE
+3. Analyse the best suited naming structure for each FILE
 """
 
 import os
@@ -218,7 +219,7 @@ class DataPreparation:
 
         # The output file must not end with a newline
         out = out[:-1]
-        with open(self.SRS_PATH_DATA_DATASET + '/text') as out_file:
+        with open(self.SRS_PATH_DATA_DATASET + '/text', 'w') as out_file:
             out_file.write(out)
 
     def spk2gender(self):
@@ -267,7 +268,7 @@ class DataPreparation:
 
         # The output file must not end with a newline
         out = out[:-1]
-        with open(self.SRS_PATH_DATA_DATASET + '/spk2gender') as out_file:
+        with open(self.SRS_PATH_DATA_DATASET + '/spk2gender', 'w') as out_file:
             out_file.write(out)
 
     def wavscp(self):
@@ -306,7 +307,7 @@ class DataPreparation:
 
         # The output file must not end with a newline
         out = out[:-1]
-        with open(self.SRS_PATH_DATA_DATASET + '/wav.scp') as out_file:
+        with open(self.SRS_PATH_DATA_DATASET + '/wav.scp', 'w') as out_file:
             out_file.write(out)
 
     def utt2spk(self):
@@ -341,29 +342,57 @@ class DataPreparation:
 
         # The output file must not end with a newline
         out = out[:-1]
-        with open(self.SRS_PATH_DATA_DATASET + '/utt2spk') as out_file:
+        with open(self.SRS_PATH_DATA_DATASET + '/utt2spk', 'w') as out_file:
             out_file.write(out)
 
-    def spk2utt(root_dir):
-        """Prepares the file 'spk2utt' """
-        if root_dir[-1] != '/':
-            root_dir += '/'
-        text_dir = root_dir + 'txt/'
-        text_contents = os.listdir(text_dir)
-        text_contents.sort()
-        spk_begin = (text_contents[0].split('.'))[0][:-4]
-        out = spk_begin
-        for text_file in text_contents:
-            fname = text_file.split('.')[0]
-            if fname[:-4] == spk_begin:
-                out += ' ' + fname
-            else:
-                spk_begin = fname[:-4]
-                out += '\n' + spk_begin + ' ' + fname
-        spkfname = open(root_dir + 'spk2utt', 'w')
-        spkfname.write(out)
-        spkfname.close()
+    def spk2utt(self):
+        """spk2utt prepares the file 'spk2utt' in the DATASET directory.
 
-# Add the main() subroutine
+        The following flow has been established:
+        1. Read 'utt2spk' from the DATASET directory (if missing, create it)
+        2. From each row extract:
+           a. FILE_ID
+           b. SPEAKER_ID
+        3. Write an output file where each line has the structure:
+           <SPEAKER_ID> <FILE_ID_1> <FILE_ID_2> ... <FILE_ID_END>
+        """
+        if not os.path.exists(self.SRS_PATH_DATA_DATASET + "/utt2spk"):
+            self.utt2spk
+
+        with open(self.SRS_PATH_DATA_DATASET + '/utt2spk', 'r') as utt2spk:
+            iterations = self.WAV_FILES
+            out = ''
+
+            # First speaker is not a new speaker
+            row = next(utt2spk).split()
+            fid = row[0]
+            sid = row[1]
+            out += sid + ' ' + fid
+            iterations -= 1
+            newSpeaker = False
+
+            while iterations:
+                if newSpeaker:
+                    out += '\n' + sid + ' ' + fid
+                    newSpeaker = False
+                    iterations -= 1
+
+                else:
+                    row = next(utt2spk).split()
+                    if row[1] == sid:
+                        fid = row[0]
+                        sid = row[1]
+                        out += ' ' + fid
+                        iterations -= 1
+
+                    else:
+                        newSpeaker = True
+
+        # The output file must not end with a newline
+        # out = out[:-1]
+        with open(self.SRS_PATH_DATA_DATASET + '/spk2utt', 'w') as out_file:
+            out_file.write(out)
+
+ # Add the main() subroutine
 if __name__ == '__main__':
     main()
