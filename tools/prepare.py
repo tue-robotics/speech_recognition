@@ -177,8 +177,18 @@ class DataPreparation:
             self.FLAG.CSV_CHECK = True
 
     def text(self):
-        """Prepares the file 'text' """
+        """text prepares the file 'text' in the DATASET directory.
 
+        The following flow has been established:
+        1. Read the CSV file
+        2. From each row extract:
+            a. SPEAKER_ID
+            b. UTTERANCE_ID
+            c. TRANSCRIPTION
+        3. Make file id "<SPEAKER_ID>U<UTTERANCE_ID>"
+        4. Write an output file where each line has the structure:
+            <FILE_ID><Tab_space><TRANSCRIPTION>
+        """
         with open(self.CSV_PATH, 'r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
             row = next(csv_reader)
@@ -193,10 +203,9 @@ class DataPreparation:
                 uid = row[self.INDEX.UTTERANCE_ID]
                 transcription = row[self.INDEX.TRANSCRIPTION]
 
-                column1 = sid + 'U' + str(uid)
-                column2 = transcription
+                fid = sid + 'U' + str(uid)
 
-                out += column1 + '\t' + column2 + '\n'
+                out += fid + '\t' + transcription + '\n'
                 iterations -= 1
 
         # The output file must not end with a newline
