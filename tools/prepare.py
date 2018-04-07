@@ -214,7 +214,15 @@ class DataPreparation:
             out_file.write(out)
 
     def spk2gender(self):
-        """Prepares the file 'spk2gender'"""
+        """spk2gender prepares the file 'spk2gender' in the DATASET directory.
+
+        The following flow has been established:
+        1. Read the CSV file
+        2. Read the first row (First Speaker) and extract the gender details
+        3. Search for a new speaker and extract its gender details
+        4. Write an output file where each line has the structure:
+            <SPEAKER_ID><Tab_space><TRANSCRIPTION>
+        """
         with open(self.CSV_PATH, 'r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter = self.CSV_DELIMITER)
             row = next(csv_reader)
