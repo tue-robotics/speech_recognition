@@ -5,6 +5,7 @@ required by Kaldi-ASR to develop Acoustic Models."""
 import os
 import sys
 import csv
+import shutil
 
 class DataPreparation:
     """Class DataPreparation takes 2 input arguments
@@ -14,7 +15,7 @@ class DataPreparation:
         param2 (str): Absolute path of the root directory of Speech Recognition System
 
     """
-    def __init__(self, csv_path, srs_path):
+    def __init__(self, csv_path, srs_path, dataSet):
         """ DataPreparation class constructor """
 
         file_extension = csv_path.split('.')[-1]
@@ -26,6 +27,7 @@ class DataPreparation:
 
         self.CSV_PATH = csv_path
         self.DATA_ROOT = os.path.dirname(csv_path)
+
         self.csvCheck
 
         # Return the exact error
@@ -38,7 +40,27 @@ class DataPreparation:
         if !os.path.exists(srs_path):
             sys.exit("Invalid path to Speech Recognition System root")
 
+        # This section maybe buggy
         self.SRS_PATH = srs_path
+        self.SRS_DATA_PATH = self.SRS_PATH + "/data"
+        self.DATA_SET = dataSet
+
+        if os.path.exists(self.SRS_DATA_PATH):
+            data_dir_contents = os.listdir(self.SRS_DATA_PATH)
+            if data_dir_contents == []:
+                os.mkdir(self.SRS_DATA_PATH + "/" + self.DATA_SET)
+            else:
+                data_dir_contents.remove('test')
+                for directory in data_dir_contents:
+                    shutil.rmtree(self.SRS_DATA_PATH + "/" + directory)
+                os.mkdir(self.SRS_DATA_PATH + "/" + self.DATA_SET)
+        else:
+            os.mkdir(self.SRS_DATA_PATH)
+            os.mkdir(self.SRS_DATA_PATH + "/" + self.DATA_SET)
+
+        self.text
+        self.spk2gender
+
 
 
     def csvCheck(self):
