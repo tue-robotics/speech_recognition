@@ -30,6 +30,7 @@ class DataPreparation:
     Args:
         param1 (str): Absolute path of the CSV metadata file
         param2 (str): Absolute path of the root directory of Speech Recognition System
+        param3 (str): Type of Dataset
 
     """
     def __init__(self, csv_path, srs_path, dataSet):
@@ -77,8 +78,8 @@ class DataPreparation:
 
         self.text
         self.spk2gender
-
-
+        self.wavscp
+        self.spk2utt
 
     def csvCheck(self):
         """csvCheck performs the preliminary checks before the construction of
@@ -392,6 +393,24 @@ class DataPreparation:
         # out = out[:-1]
         with open(self.SRS_PATH_DATA_DATASET + '/spk2utt', 'w') as out_file:
             out_file.write(out)
+
+def main():
+    """When script is executed as __main__:
+
+    Args:
+        param1 (str): Absolute path of the CSV metadata file
+        param2 (str): Absolute path of the root directory of Speech Recognition System
+        param3 (str): Type of Dataset
+    """
+    if not len(sys.argv) == 4:
+        sys.exit("Not enough input arguments")
+
+    else:
+        csv_path = sys.argv[1]
+        srs_path = sys.argv[2]
+        dataSet = sys.argv[3]
+
+        DataPreparation(csv_path, srs_path, dataSet)
 
  # Add the main() subroutine
 if __name__ == '__main__':
