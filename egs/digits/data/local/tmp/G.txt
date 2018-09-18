@@ -1,0 +1,23 @@
+0    1    tiina    tiina    2.39789527279837
+0    2    do    do    2.39789527279837
+0    3    paanca    paanca    2.39789527279837
+0    4    aatxha    aatxha    2.39789527279837
+0    5    saata    saata    2.39789527279837
+0    6    chaha    chaha    2.39789527279837
+0    7    caara    caara    2.39789527279837
+0    8    eek    eek    2.39789527279837
+0    9    nou    nou    2.39789527279837
+0    10    #0    #0    2.39789527279837
+0    11    shuunya    shuunya    2.39789527279837
+10    12    <eps>    <eps>    0
+4    12    <eps>    <eps>    0
+7    12    <eps>    <eps>    0
+6    12    <eps>    <eps>    0
+2    12    <eps>    <eps>    0
+8    12    <eps>    <eps>    0
+9    12    <eps>    <eps>    0
+3    12    <eps>    <eps>    0
+5    12    <eps>    <eps>    0
+11    12    <eps>    <eps>    0
+1    12    <eps>    <eps>    0
+12    0

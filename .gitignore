@@ -2,4 +2,5 @@
 **/log
 
 # ignore the digits directory in egs
-egs/digits
+egs/digits/all
+egs/digits/wav

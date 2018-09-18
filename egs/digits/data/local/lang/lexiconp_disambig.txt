@@ -1,0 +1,12 @@
+aatxha	1.0	aa_B txh_E
+caara	1.0	c_B aa_I r_E
+chaha	1.0	ch_B a_I h_E
+do	1.0	d_B o_E
+eek	1.0	ee_B k_E
+nou	1.0	n_B ou_E
+paanca	1.0	p_B aan_I c_E
+saata	1.0	s_B aa_I t_E
+shuunya	1.0	sh_B uu_I n_I y_I a_E
+sil	1.0	sil_S #1
+!SIL	1.0	sil_S #2
+tiina	1.0	t_B ii_I n_E

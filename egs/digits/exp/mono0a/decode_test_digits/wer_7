@@ -1,0 +1,4 @@
+compute-wer --text --mode=present ark:exp/mono0a/decode_test_digits/scoring/text.filt ark:exp/mono0a/decode_test_digits/scoring/7.txt 
+%WER 10.00 [ 10 / 100, 0 ins, 0 del, 10 sub ]
+%SER 10.00 [ 10 / 100 ]
+Scored 100 sentences, 0 not present in hyp.
