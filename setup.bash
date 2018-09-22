@@ -13,11 +13,11 @@ usage()
 	echo "-----------------------------------------------------------------------------"
 	echo "Usage: sudo ./setup [options] <values>"
 	echo -e "Options:\n \
-	-h | --help\n \
-	--install-kaldi\n \
-	--update-kaldi\n \
-    --clean\n \
-    --complete"
+        -h | --help\n \
+        --install-kaldi\n \
+        --update-kaldi\n \
+        --clean\n \
+        --complete"
     echo
 	echo "-----------------------------------------------------------------------------"
 }
@@ -32,10 +32,26 @@ if [ "$(/usr/bin/id -u)" -ne 0 ]; then
 	exit 1
 fi
 
-# Export LASeR Environment Variables
-export ASR_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export KALDI_ROOT=$ASR_HOME/kaldi
-export ASR_LOG=$ASR_HOME/log
+ASR_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Export LASeR Environment Variables in .bashrc
+# Check if the entry for .bash_exports exists in .bashrc
+BASHEXPORTS=$( grep ".bash_exports" ~/.bashrc )
+
+if [ -z "$BASHEXPORTS" ]
+then
+    echo -e "if [ -f ~./bash_exports]; then\n    . ~/.bash_exports\nfi" >> ~/.bashrc
+fi
+
+LASERENV=$( grep "$ASR_HOME/LASeR_env.bash" ~/.bash_exports )
+
+if [ -z "$LASERENV" ]
+then
+    echo "source $ASR_HOME/LASeR_env.bash" >> ~/.bash_exports
+fi
+
+source ~/.bashrc
+#source LASeR_env.bash
 
 # Setup script variables
 KALDI=$KALDI_ROOT
@@ -47,17 +63,24 @@ log()
 }
 
 # Create Log directory
-if [ ! -d "$LOG_DIR" ]; then
-	mkdir $LOG_DIR
+if [ ! -d "$ASR_LOG" ]
+then
+	mkdir $ASR_LOG
 fi
 
-# Change system timezone to Europe/Amsterdam
-sudo timedatectl set-timezone Europe/Amsterdam
+# Change system timezone to Europe/Amsterdam [May not be required]
+# sudo timedatectl set-timezone Europe/Amsterdam
 
 # Install the required packages and dependencies
 sudo apt-get update -qq > /dev/null
 sudo apt-get upgrade --assume-yes -qq > /dev/null
-sudo apt-get install --assume-yes build-essential postgresql postgresql-contrib python3-scipy python3-psycopg2 ipython3 sox zip festival git aptitude dphys-swapfile
+sudo apt-get install --assume-yes build-essential git dphys-swapfile python3-scipy ipython3 sox zip -qq > /dev/null 
+
+# Install Postgresql only if required to
+# postgresql postgresql-contrib python3-psycopg2 
+
+# Install festival for TTS
+# festival 
 
 # Kaldi Installation
 kaldi_install()
