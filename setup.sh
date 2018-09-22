@@ -9,14 +9,14 @@
 usage()
 {
 	echo "-----------------------------------------------------------------------------"
-	echo "                  LASeR: Linux Automatic Speech Recognition                  "
+	echo -e "\e[35m\e[1m                  LASeR: Linux Automatic Speech Recognition \e[0m"
 	echo "-----------------------------------------------------------------------------"
 	echo "Usage: sudo ./setup [options] <values>"
 	echo -e "Options:\n \
 	-h | --help\n \
 	--install-kaldi\n \
 	--update-kaldi"
-  echo
+    echo
 	echo "-----------------------------------------------------------------------------"
 	echo "                     2018 Arpit Aggarwal, TU Eindhoven                       "
 	echo "-----------------------------------------------------------------------------"
@@ -32,12 +32,12 @@ if [ "$(/usr/bin/id -u)" -ne 0 ]; then
 	exit
 fi
 
-# Set Variables
-ASR_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT="$( cd "$( dirname "${ASR_HOME}" )" && pwd )"
-KALDI=$ROOT/kaldi
-LOG_DIR=$ASR_HOME/log
-log_file=$LOG_DIR/setup.log
+# Export LASeR Environment Variables
+export ASR_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#ROOT="$( cd "$( dirname "${ASR_HOME}" )" && pwd )"
+export KALDI_ROOT=$ASR_HOME/kaldi
+export ASR_LOG=$ASR_HOME/log
+#log_file=$LOG_DIR/setup.log
 
 # Logging function
 log()
@@ -45,24 +45,19 @@ log()
 	echo "$(date "+%Y-%m-%d %H:%M:%S"): $1" >> $log_file
 }
 
-# Create Log File
+# Create Log directory
 if [ ! -d "$LOG_DIR" ]; then
 	mkdir $LOG_DIR
 fi
-touch $log_file
-log "LASeR setup initiated"
+#touch $log_file
 
 # Change system timezone to Europe/Amsterdam
 sudo timedatectl set-timezone Europe/Amsterdam
-log "System timezone changed to Europe/Amsterdam"
 
 # Install the required packages and dependencies
-sudo apt-get update
-log "Update complete"
-sudo apt-get upgrade -y
-log "Upgrade complete"
-sudo apt-get install -y postgresql postgresql-contrib build-essential python3-scipy python3-psycopg2 ipython3 sox zip festival git aptitude dphys-swapfile
-log "Installation of packages 'postgresql postgresql-contrib build-essential python3-scipy python3-psycopg2 ipython3 sox zip festival git aptitude dphys-swapfile' complete"
+sudo apt-get update -qq > /dev/null
+sudo apt-get upgrade --assume-yes -qq > /dev/null
+sudo apt-get install --assume-yes build-essential postgresql postgresql-contrib python3-scipy python3-psycopg2 ipython3 sox zip festival git aptitude dphys-swapfile
 
 # Kaldi: Installation/Update
 kaldi_install()
@@ -147,24 +142,31 @@ setup_clean()
 }
 
 # Read Postional Parameters
-if [ -z "$1" ]; then
+if [ -z "$1" ]
+then
 	usage
 else
-	while [ "$1" != "" ]; do
+	while [ "$1" != "" ]
+    do
 	    case $1 in
-			--install-kaldi )				kaldi_install
-											;;
-			--update-kaldi )				kaldi_update
-											;;
-			clean )									setup_clean
-												;;
-	        -h | --help )           		usage
-	                                		exit
-	                                		;;
-	        * )                     		usage
-	                                		exit 1
-											;;
+			--install-kaldi )
+                kaldi_install ;;
+
+            --update-kaldi ) 
+                kaldi_update ;;
+
+            --clean )
+                setup_clean ;;
+
+	        -h | --help )
+                usage
+                exit 1 ;;
+                
+	        * )
+                usage
+                exit 1 ;;
 	    esac
 	    shift
 	done
 fi
+
