@@ -16,8 +16,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV USER=hero
 
 # Update the image and install basic packages
-RUN apt-get update && apt-get install --assume-yes --no-install-recommends apt-utils sudo
-# git wget curl
+RUN apt-get update -qq > /dev/null && apt-get install --assume-yes --no-install-recommends apt-utils curl git sudo wget -qq > /dev/null
 
 # Add user USER with SUDO previleges and disable SUDO password
 RUN addgroup -gid 2000 $USER && \
@@ -36,6 +35,9 @@ COPY / ./_git/
 
 # Change owner of directory to USER from root
 RUN sudo chown -R $USER:$USER _git
+
+# Run setup and install all dependencies
+RUN ./_git/setup.bash --complete
 
 # Start container of the Docker image at bash prompt
 CMD ["/bin/bash"]
