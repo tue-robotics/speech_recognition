@@ -6,3 +6,4 @@ services:
 
 script:
     - ci/travis-build.bash
+    - ci/travis-unittests.bash
