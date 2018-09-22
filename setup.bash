@@ -15,7 +15,9 @@ usage()
 	echo -e "Options:\n \
 	-h | --help\n \
 	--install-kaldi\n \
-	--update-kaldi"
+	--update-kaldi\n \
+    --clean\n \
+    --complete"
     echo
 	echo "-----------------------------------------------------------------------------"
 }
@@ -27,14 +29,13 @@ if [ "$(/usr/bin/id -u)" -ne 0 ]; then
 	echo "Check usage for more details."
 	echo
 	usage
-	exit
+	exit 1
 fi
 
 # Export LASeR Environment Variables
 export ASR_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export KALDI_ROOT=$ASR_HOME/kaldi
 export ASR_LOG=$ASR_HOME/log
-#log_file=$LOG_DIR/setup.log
 
 # Setup script variables
 KALDI=$KALDI_ROOT
@@ -49,7 +50,6 @@ log()
 if [ ! -d "$LOG_DIR" ]; then
 	mkdir $LOG_DIR
 fi
-#touch $log_file
 
 # Change system timezone to Europe/Amsterdam
 sudo timedatectl set-timezone Europe/Amsterdam
@@ -62,11 +62,12 @@ sudo apt-get install --assume-yes build-essential postgresql postgresql-contrib 
 # Kaldi Installation
 kaldi_install()
 {
-	echo "Checking for an existing Kaldi-ASR installation in $KALDI"
-	if [ ! -d "$KALDI" ]
+	echo -e "\e[36m\e[1m Checking for an existing Kaldi-ASR installation in $KALDI \e[0m"
+	
+    if [ ! -d "$KALDI" ]
     then
-		echo "No existing installation found. Initiating installation..."
-		echo "Cloning repository from GitHub"
+        # Clone repository into $KALDI
+		echo -e "\e[36m\e[1m No existing installation found. Cloning from GitHub repository \e[0m"
 		git clone https://github.com/kaldi-asr/kaldi.git $KALDI
 		
         # Change exit to return to source check_dependencies and change back once done
@@ -74,25 +75,34 @@ kaldi_install()
 		source $KALDI/tools/extras/check_dependencies.sh
 		sed -i "s|return|exit|g" $KALDI/tools/extras/check_dependencies.sh
 		
-        log "Installing dependencies"
-		sudo apt-get install libatlas3-base $debian_packages
+        # Install dependencies
+        echo -e "\e[36m\e[1m Installing dependencies \e[0m"
+		sudo apt-get install libatlas3-base $debian_packages -qq > /dev/null
 		sudo ln -s -f bash /bin/sh
-		
+	    
+        # Build toolkit
+		echo -e "\e[36m\e[1m Building toolkit \e[0m"
         cd $KALDI/tools
-		log "Building toolkit"
 		make -j 4
 		extras/install_irstlm.sh
-		cd ../src
+		
+        cd ../src
 		./configure --shared
 		make depend -j 4
 		make -j 4
-		log "Kaldi installation complete"
-		cd $KALDI
+        
+        # Create a STATUS file to monitor installation
+		echo -e "\e[36m\e[1m Kaldi installation complete \e[0m"	
+        cd $KALDI
 		echo "ALL OK" > STATUS
-	else
+	
+    else
+        # Read STATUS file. If not "ALL OK", remove directory $KALDI and re-install Kaldi 
 		kaldi_install_status="$(cat $KALDI/STATUS)"
-		if [ "$kaldi_install_status" != "ALL OK" ]
+		
+        if [ "$kaldi_install_status" != "ALL OK" ]
         then
+            sudo rm -rf $KALDI
 			kaldi_install
 		fi
 	fi
@@ -103,26 +113,39 @@ kaldi_update()
 {
 	if [ ! -d "$KALDI" ]
     then
+        # Install Kaldi if directory $KALDI not present
 		kaldi_install
 	else
+        # Read STATUS file. If "ALL OK" then update else remove directory $KALDI
+        # and re-install Kaldi 
 		kaldi_install_status="$(cat $KALDI/STATUS)"
-		if [ "$kaldi_install_status" = "ALL OK" ]
+		
+        if [ "$kaldi_install_status" = "ALL OK" ]
         then
+			# Pull changes from the repository
+            echo -e "\e[36m\e[1m Updating repository from GitHub \e[0m"
 			cd $KALDI
-			log "Updating repository from GitHub"
 			git pull
-			cd tools
-			log "Cleaning existing make"
+			
+            # Clean existing make
+			echo -e "\e[36m\e[1m Cleaning existing make \e[0m"
+            cd tools
 			make distclean
-			log "Building toolkit"
-			make -j 4
+		    cd ../src
+            make distclean
+            
+            # Build toolkit
+            echo -e "\e[36m\e[1m Building toolkit \e[0m"
+			cd ../tools
+            make -j 4
 			extras/install_irstlm.sh
-			cd ../src
-			make distclean
+			
+            cd ../src
 			./configure --shared
 			make depend -j 4
 			make -j 4
-			log "Kaldi-ASR update complete"
+			
+            echo -e "\e[36m\e[1m Kaldi-ASR update complete \e[0m"
 		else
 			sudo rm -rf $KALDI
 			kaldi_install
@@ -139,7 +162,7 @@ setup_clean()
 setup_complete()
 {
     # TODO: Complete subroutine
-    echo -e "\e[35m\e[1mSetting up complete repository \e[0m"
+    kaldi_update
 }
 
 # Read Postional Parameters
