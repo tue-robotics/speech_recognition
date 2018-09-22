@@ -18,8 +18,6 @@ usage()
 	--update-kaldi"
     echo
 	echo "-----------------------------------------------------------------------------"
-	echo "                     2018 Arpit Aggarwal, TU Eindhoven                       "
-	echo "-----------------------------------------------------------------------------"
 }
 
 if [ "$(/usr/bin/id -u)" -ne 0 ]; then
@@ -34,7 +32,6 @@ fi
 
 # Export LASeR Environment Variables
 export ASR_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-#ROOT="$( cd "$( dirname "${ASR_HOME}" )" && pwd )"
 export KALDI_ROOT=$ASR_HOME/kaldi
 export ASR_LOG=$ASR_HOME/log
 #log_file=$LOG_DIR/setup.log
@@ -123,22 +120,15 @@ kaldi_update()
 	fi
 }
 
-kaldi_test()
-{
-	log "Testing Kaldi installation"
-	cd $ASR_HOME/egs
-	tar -xvzf digits.tar.gz
-	cd digits
-	sed -i "1iexport KALDI_ROOT=$KALDI" path.sh
-	mkdir steps utils
-	ln -s $KALDI/egs/wsj/s5/steps steps
-	ln -s $KALDI/egs/wsj/s5/utils utils
-
-}
-
 setup_clean()
 {
 	sudo git clean -fdx
+}
+
+setup_complete()
+{
+    # TODO: Complete subroutine
+    echo -e "\e[35m\e[1mSetting up complete repository \e[0m"
 }
 
 # Read Postional Parameters
@@ -157,6 +147,9 @@ else
 
             --clean )
                 setup_clean ;;
+
+            --complete )
+                setup_complete ;;
 
 	        -h | --help )
                 usage
