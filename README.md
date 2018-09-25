@@ -1,4 +1,4 @@
-# LASeR: Linux Automation Speech Recognition
+# LASeR: Linux Automation Speech Recognition [![Build Status](https://travis-ci.org/tue-robotics/speech_recognition.svg?branch=master)](https://travis-ci.org/tue-robotics/speech_recognition)
 Speech recognition system based on [Kaldi-ASR](http://kaldi-asr.org/) toolkit. The backend library is written in C++ and has supports CUDA to build GPU accelerated models. Bash is used for most front-end operations and Python for data processing.
 
 ## Installation
