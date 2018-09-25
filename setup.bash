@@ -51,6 +51,15 @@ then
 fi
 
 source ~/.bashrc
+
+# Check if environment variables are sourced correctly
+echo -e "\e[35m\e[1m Checking if .bashrc is sourced correctly \e[0m"
+if [ -z $KALDI_ROOT ]
+then
+    echo -e "\e[34m\e[1m Variables not sourced \e[0m"
+    exit -1
+fi
+
 #source LASeR_env.bash
 
 # Setup script variables
