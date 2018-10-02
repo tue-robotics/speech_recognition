@@ -41,7 +41,7 @@ BASHEXPORTS=$( grep ".bash_exports" ~/.bashrc )
 if [ -z "$BASHEXPORTS" ]
 then
     echo -e "\e[35m\e[1m .bash_exports not found"
-    echo -e "if [ -f ~./bash_exports]; then\n    . ~/.bash_exports\nfi" >> ~/.bashrc
+    echo -e "if [ -f ~./bash_exports ]; then\n    . ~/.bash_exports\nfi" >> ~/.bashrc
 fi
 
 if [ ! -f ~/.bash_exports ]
