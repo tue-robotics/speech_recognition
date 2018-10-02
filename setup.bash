@@ -41,12 +41,17 @@ BASHEXPORTS=$( grep ".bash_exports" ~/.bashrc )
 if [ -z "$BASHEXPORTS" ]
 then
     echo -e "\e[35m\e[1m .bash_exports not found"
-    echo -e "if [ -f ~./bash_exports ]; then\n    . ~/.bash_exports\nfi" >> ~/.bashrc
+    echo "
+# Export definitions
+if [ -f ~/.bash_exports ]; then
+    . ~/.bash_exports
+fi" >> ~/.bashrc
 fi
 
 if [ ! -f ~/.bash_exports ]
 then
-    echo -e "#! /usr/bin/env bash\n" > ~/.bash_exports
+    echo "#! /usr/bin/env bash
+" > ~/.bash_exports
 fi
 
 LASERENV=$( grep "$ASR_HOME/LASeR_env.bash" ~/.bash_exports )
@@ -54,7 +59,9 @@ LASERENV=$( grep "$ASR_HOME/LASeR_env.bash" ~/.bash_exports )
 if [ -z "$LASERENV" ]
 then
     echo -e "\e[35m\e[1m LASeR_env.bash not found in .bash_exports \e[0m"
-    echo "source $ASR_HOME/LASeR_env.bash" >> ~/.bash_exports
+    echo "# Source Speech Recognition Environment
+source $ASR_HOME/LASeR_env.bash
+" >> ~/.bash_exports
 fi
 
 set -i
