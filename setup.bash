@@ -40,17 +40,26 @@ BASHEXPORTS=$( grep ".bash_exports" ~/.bashrc )
 
 if [ -z "$BASHEXPORTS" ]
 then
+    echo -e "\e[35m\e[1m .bash_exports not found"
     echo -e "if [ -f ~./bash_exports]; then\n    . ~/.bash_exports\nfi" >> ~/.bashrc
+fi
+
+if [ ! -f ~/.bash_exports ]
+then
+    echo -e "#! /usr/bin/env bash\n" > ~/.bash_exports
 fi
 
 LASERENV=$( grep "$ASR_HOME/LASeR_env.bash" ~/.bash_exports )
 
 if [ -z "$LASERENV" ]
 then
+    echo -e "\e[35m\e[1m LASeR_env.bash not found in .bash_exports \e[0m"
     echo "source $ASR_HOME/LASeR_env.bash" >> ~/.bash_exports
 fi
 
+set -i
 source ~/.bashrc
+set +i
 
 # Check if environment variables are sourced correctly
 echo -e "\e[35m\e[1m Checking if .bashrc is sourced correctly \e[0m"
@@ -58,9 +67,10 @@ if [ -z $KALDI_ROOT ]
 then
     echo -e "\e[34m\e[1m Variables not sourced \e[0m"
     exit -1
+else
+    echo -e "\e[34m\e[1m Variables sourced \e[0m"
+    exit 0
 fi
-
-#source LASeR_env.bash
 
 # Setup script variables
 KALDI=$KALDI_ROOT
