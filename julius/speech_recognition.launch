@@ -1,0 +1,56 @@
+<launch>
+  <arg name="namespace" default="/hsrb" />
+  <arg name="voice_ns_prefix" default="voice" />
+  <arg name="julius_config_file" default="$(find tmc_rosjulius)/conf/common.jconf" />
+  <arg name="lm_grammar_mode" default="false" />
+  <arg name="lm_locale" default="en" />
+  <arg name="acoustic_model_en"
+       default="-h /usr/share/julius-voxforge/acoustic/hmmdefs -hlist /usr/share/julius-voxforge/acoustic/tiedlist" />
+  <arg name="acoustic_model_ja"
+       default="-h $(find tmc_julius)/model/phone_m/jnas-tri-3k16-gid.binhmm -hlist $(find tmc_julius)/model/phone_m/logicalTri" />
+  <arg name="dic_list" default="" />
+  <arg name="dic_list_en_word"
+       default="$(find tmc_rosjulius)/grammar/en/dic-list_word.txt" />
+  <arg name="dic_list_ja_word"
+       default="$(find tmc_rosjulius)/grammar/ja/dic-list_word.txt" />
+  <arg name="dic_list_en_grammar"
+       default="$(find tmc_rosjulius)/grammar/en/dic-list_grammar.txt" />
+  <arg name="dic_list_ja_grammar"
+       default="$(find tmc_rosjulius)/grammar/ja/dic-list_grammar.txt" />
+  <arg name="other_options" default="" />
+  <arg name="other_options_en" default="-wsil sil sil NULL -sb 200.0" />
+  <arg name="other_options_ja" default="-sb 80.0 -multipath" />
+  <arg name="run_julius_cmd" default="rosrun tmc_julius julius" />
+
+  <arg name="moduleport" default="10500" />
+  <arg name="auto_start" default="true" />
+  <arg name="timeout" default="10" />
+  <arg name="yomi2voca_cmd" default="$(find tmc_julius)/yomi2voca.pl" />
+  <arg name="input_on_change" default="terminate" />
+
+  <group ns="$(arg namespace)">
+    <param name="voice_ns_prefix" value="$(arg voice_ns_prefix)" />
+    <param name="$(arg voice_ns_prefix)/julius_config_file" value="$(arg julius_config_file)" />
+    <param name="$(arg voice_ns_prefix)/lm_grammar_mode" value="$(arg lm_grammar_mode)" />
+    <param name="$(arg voice_ns_prefix)/lm_locale" value="$(arg lm_locale)" />
+    <param name="$(arg voice_ns_prefix)/acoustic_model_en" value="$(arg acoustic_model_en)" />
+    <param name="$(arg voice_ns_prefix)/acoustic_model_ja" value="$(arg acoustic_model_ja)" />
+    <param name="$(arg voice_ns_prefix)/dic_list" value="$(arg dic_list)" />
+    <param name="$(arg voice_ns_prefix)/dic_list_en_word" value="$(arg dic_list_en_word)" />
+    <param name="$(arg voice_ns_prefix)/dic_list_ja_word" value="$(arg dic_list_ja_word)" />
+    <param name="$(arg voice_ns_prefix)/dic_list_en_grammar" value="$(arg dic_list_en_grammar)" />
+    <param name="$(arg voice_ns_prefix)/dic_list_ja_grammar" value="$(arg dic_list_ja_grammar)" />
+    <param name="$(arg voice_ns_prefix)/other_options" value="$(arg other_options)" />
+    <param name="$(arg voice_ns_prefix)/other_options_en" value="$(arg other_options_en)" />
+    <param name="$(arg voice_ns_prefix)/other_options_ja" value="$(arg other_options_ja)" />
+    <param name="$(arg voice_ns_prefix)/run_julius_cmd" value="$(arg run_julius_cmd)" />
+    <param name="$(arg voice_ns_prefix)/moduleport" value="$(arg moduleport)" />
+    <param name="$(arg voice_ns_prefix)/auto_start" value="$(arg auto_start)" />
+    <param name="$(arg voice_ns_prefix)/timeout" value="$(arg timeout)" />
+    <param name="$(arg voice_ns_prefix)/yomi2voca_cmd" value="$(arg yomi2voca_cmd)" />
+    <param name="$(arg voice_ns_prefix)/input_on_change" value="$(arg input_on_change)" />
+    <node pkg="tmc_rosjulius" name="run_julius" type="run_julius" respawn="true" />
+    <node pkg="tmc_rosjulius" name="tmc_rosjulius" type="rosjulius" output="screen" respawn="true" />
+  </group>
+</launch>
+
