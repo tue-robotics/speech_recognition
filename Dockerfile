@@ -16,7 +16,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV USER=hero
 
 # Update the image and install basic packages
-RUN apt-get update -qq > /dev/null && apt-get install --assume-yes --no-install-recommends apt-utils curl dbus dialog git sudo wget -qq > /dev/null
+RUN apt-get update -qq > /dev/null && apt-get install --assume-yes --no-install-recommends apt-utils ca-certificates curl dbus dialog git sudo wget -qq > /dev/null
 
 # Add user USER with SUDO previleges and disable SUDO password
 RUN addgroup -gid 2000 $USER && \
