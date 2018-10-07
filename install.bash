@@ -98,9 +98,9 @@ fi
 # sudo timedatectl set-timezone Europe/Amsterdam
 
 # Install the required packages and dependencies
-sudo apt-get update -qq > /dev/null 2 > &1
-sudo apt-get upgrade --assume-yes -qq > /dev/null 2 > &1
-sudo apt-get install --assume-yes build-essential git dphys-swapfile python3-scipy ipython3 sox zip -qq > /dev/null 2 > &1
+sudo apt-get update -qq > /dev/null 2>&1
+sudo apt-get upgrade --assume-yes -qq > /dev/null 2>&1
+sudo apt-get install --assume-yes build-essential git dphys-swapfile python3-scipy ipython3 sox zip -qq > /dev/null 2>&1
 
 # Install Postgresql only if required to
 # postgresql postgresql-contrib python3-psycopg2
