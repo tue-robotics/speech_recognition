@@ -76,7 +76,7 @@ then
     exit -1
 else
     echo -e "\e[34m\e[1m Variables sourced \e[0m"
-    exit 0
+    # exit 0
 fi
 
 # Setup script variables
@@ -98,15 +98,15 @@ fi
 # sudo timedatectl set-timezone Europe/Amsterdam
 
 # Install the required packages and dependencies
-sudo apt-get update -qq > /dev/null
-sudo apt-get upgrade --assume-yes -qq > /dev/null
-sudo apt-get install --assume-yes build-essential git dphys-swapfile python3-scipy ipython3 sox zip -qq > /dev/null 
+sudo apt-get update -qq > /dev/null 2 > &1
+sudo apt-get upgrade --assume-yes -qq > /dev/null 2 > &1
+sudo apt-get install --assume-yes build-essential git dphys-swapfile python3-scipy ipython3 sox zip -qq > /dev/null 2 > &1
 
 # Install Postgresql only if required to
-# postgresql postgresql-contrib python3-psycopg2 
+# postgresql postgresql-contrib python3-psycopg2
 
 # Install festival for TTS
-# festival 
+# festival
 
 # Kaldi Installation
 kaldi_install()
@@ -117,7 +117,7 @@ kaldi_install()
     then
         # Clone repository into $KALDI
         echo -e "\e[36m\e[1m No existing installation found. Cloning from GitHub repository \e[0m"
-        git clone https://github.com/kaldi-asr/kaldi.git $KALDI
+        git clone --depth=1 https://github.com/kaldi-asr/kaldi.git $KALDI
 
         # Change exit to return to source check_dependencies and change back once done
         sed -i "s|exit|return|g" $KALDI/tools/extras/check_dependencies.sh
