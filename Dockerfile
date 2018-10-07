@@ -37,7 +37,7 @@ COPY / ./_git/
 RUN sudo chown -R $USER:$USER _git
 
 # Run setup and install all dependencies
-RUN sudo ./_git/setup.bash --complete
+RUN sudo ./_git/install.bash --complete
 
 # Start container of the Docker image at bash prompt
 CMD ["/bin/bash"]
