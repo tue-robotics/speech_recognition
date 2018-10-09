@@ -108,6 +108,68 @@ sudo apt-get install --assume-yes build-essential git dphys-swapfile python pyth
 # Install festival for TTS
 # festival
 
+# Kaldi Build (Common to Installation and Update)
+_kaldi_build()
+{
+    # Change exit to return to source check_dependencies and change back once done
+    sed -i "s|exit|return|g" $KALDI/tools/extras/check_dependencies.sh
+    source $KALDI/tools/extras/check_dependencies.sh
+    sed -i "s|return|exit|g" $KALDI/tools/extras/check_dependencies.sh
+
+    # Install dependencies
+    echo -e "\e[36m\e[1m Installing dependencies \e[0m"
+    sudo apt-get install libatlas3-base $debian_packages -qq > /dev/null
+    sudo ln -s -f bash /bin/sh
+
+    # Build toolkit
+    echo -e "\e[36m\e[1m Building toolkit \e[0m"
+    # Build the tools directory
+    cd $KALDI/tools
+    make -j 4 &> $ASR_LOG/make_tools.log
+    make_tools_status=$( tail -n 1 $ASR_LOG/make_tools.log )
+
+    if [ "$make_tools_status" != "All done OK." ]
+    then
+        echo -e "\e[34m\e[1m Make kaldi/tools failed \e[0m"
+        exit 1
+    fi
+
+    extras/install_irstlm.sh &> $ASR_LOG/install_irstlm.log
+    install_irstlm_status=$( grep "Installation of IRSTLM finished successfully" $ASR_LOG/install_irstlm.log )
+
+    if [ -z "$install_irstlm_status" ]
+    then
+        echo -e "\e[34m\e[1m Install kaldi/tools/extras/install_irstlm.sh failed \e[0m"
+        exit 1
+    fi
+
+    # Build the src directory
+    cd $KALDI/src
+    ./configure --shared &> $ASR_LOG/configure_src.log
+    configure_src_status=$( grep "SUCCESS" $ASR_LOG/configure_src.log )
+
+    if [ -z "$configure_src_status" ]
+    then
+        echo -e "\e[34m\e[1m Configure src failed \e[0m"
+        exit 1
+    fi
+
+    make depend -j 4 > /dev/null
+    make -j 4 &> $ASR_LOG/make_src.log
+    make_src_status=$( grep "Done" $ASR_LOG/make_src.log )
+
+    if [ -z "$make_src_status" ]
+    then
+        echo -e "\e[34m\e[1m Make src failed \e[0m"
+        exit 1
+    fi
+
+    # Create a STATUS file to monitor installation
+    echo -e "\e[36m\e[1m Kaldi installation complete \e[0m"	
+    cd $KALDI
+    echo "ALL OK" > STATUS
+}
+
 # Kaldi Installation
 kaldi_install()
 {
@@ -118,65 +180,7 @@ kaldi_install()
         # Clone repository into $KALDI
         echo -e "\e[36m\e[1m No existing installation found. Cloning from GitHub repository \e[0m"
         git clone --depth=1 https://github.com/kaldi-asr/kaldi.git $KALDI
-
-        # Change exit to return to source check_dependencies and change back once done
-        sed -i "s|exit|return|g" $KALDI/tools/extras/check_dependencies.sh
-        source $KALDI/tools/extras/check_dependencies.sh
-        sed -i "s|return|exit|g" $KALDI/tools/extras/check_dependencies.sh
-
-        # Install dependencies
-        echo -e "\e[36m\e[1m Installing dependencies \e[0m"
-        sudo apt-get install libatlas3-base $debian_packages -qq > /dev/null
-        sudo ln -s -f bash /bin/sh
-
-        # Build toolkit
-        echo -e "\e[36m\e[1m Building toolkit \e[0m"
-        # Build the tools directory
-        cd $KALDI/tools
-        make -j 4 &> $ASR_LOG/make_tools.log
-        make_tools_status=$( tail -n 1 $ASR_LOG/make_tools.log )
-
-        if [ "$make_tools_status" != "All done OK." ]
-        then
-            echo -e "\e[34m\e[1m Make kaldi/tools failed \e[0m"
-            exit 1
-        fi
-
-        extras/install_irstlm.sh &> $ASR_LOG/install_irstlm.log
-        install_irstlm_status=$( grep "Installation of IRSTLM finished successfully" $ASR_LOG/install_irstlm.log )
-
-        if [ -z "$install_irstlm_status" ]
-        then
-            echo -e "\e[34m\e[1m Install kaldi/tools/extras/install_irstlm.sh failed \e[0m"
-            exit 1
-        fi
-
-        # Build the src directory
-        cd $KALDI/src
-        ./configure --shared &> $ASR_LOG/configure_src.log
-        configure_src_status=$( grep "SUCCESS" $ASR_LOG/configure_src.log )
-
-        if [ -z "$configure_src_status" ]
-        then
-            echo -e "\e[34m\e[1m Configure src failed \e[0m"
-            exit 1
-        fi
-
-        make depend -j 4 > /dev/null
-        make -j 4 &> $ASR_LOG/make_src.log
-        make_src_status=$( grep "Done" $ASR_LOG/make_src.log )
-
-        if [ -z "$make_src_status" ]
-        then
-            echo -e "\e[34m\e[1m Make src failed \e[0m"
-            exit 1
-        fi
-
-        # Create a STATUS file to monitor installation
-        echo -e "\e[36m\e[1m Kaldi installation complete \e[0m"	
-        cd $KALDI
-        echo "ALL OK" > STATUS
-
+        _kaldi_build
     else
         # Read STATUS file. If not "ALL OK", remove directory $KALDI and re-install Kaldi 
         kaldi_install_status="$(cat $KALDI/STATUS)"
@@ -210,21 +214,13 @@ kaldi_update()
 
             # Clean existing make
             echo -e "\e[36m\e[1m Cleaning existing make \e[0m"
-            cd tools
+            cd $KALDI/tools
             make distclean
-            cd ../src
+            cd $KALDI/src
             make distclean
 
             # Build toolkit
-            echo -e "\e[36m\e[1m Building toolkit \e[0m"
-            cd ../tools
-            make -j 4
-            extras/install_irstlm.sh
-
-            cd ../src
-            ./configure --shared
-            make depend -j 4
-            make -j 4
+            _kaldi_build
 
             echo -e "\e[36m\e[1m Kaldi-ASR update complete \e[0m"
         else
