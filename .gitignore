@@ -14,3 +14,9 @@ utils
 # Build files from models
 mfcc/
 exp/
+**/data/lang/
+**/data/local/lang/
+**/data/local/tmp/
+**/cmvn.scp*
+**/feats.scp
+**/split*/
