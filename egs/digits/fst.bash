@@ -26,9 +26,33 @@ python local/generate_bigram.py $tmp_/words1.txt > $tmp_/wp_gram.txt
 
 local/make_rm_lm.pl $tmp_/wp_gram.txt > $tmp_/G.txt
 
-echo -e "\e[35m\e[1m Done till here \e[0m"
 fstcompile --isymbols=$lang_/words.txt --osymbols=$lang_/words.txt \
-   --keep_isymbols=false --keep_osymbols=false $tmp_/G.txt > $lang_/G.fst
+   --keep_isymbols=false --keep_osymbols=false $tmp_/G.txt | fstarcsort --sort_type=ilabel > $lang_/G.fst
+
+echo -e "\e[35m\e[1m Done till here \e[0m"
+
+#fstcompile --isymbols=$lang/words.txt --osymbols=$lang/words.txt $lang/G.txt | fstdeterminizestar | fstminimize > $lang/G.fst
+
+# Checking that G is stochastic [note, it wouldn't be for an Arpa]
+fstisstochastic $lang_/G.fst || echo Error: G is not stochastic
+
+# Checking that G.fst is determinizable.
+fstdeterminize $lang_/G.fst /dev/null || echo Error determinizing G.
+
+# Checking that L_disambig.fst is determinizable.
+fstdeterminize $lang_/L_disambig.fst /dev/null || echo Error determinizing L.
+
+# Checking that disambiguated lexicon times G is determinizable
+fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
+   fstdeterminize >/dev/null || echo Error
+
+# Checking that LG is stochastic:
+fsttablecompose $lang_/L.fst $lang_/G.fst | \
+   fstisstochastic || echo Error: LG is not stochastic.
+
+# Checking that L_disambig.G is stochastic:
+fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
+   fstisstochastic || echo Error: LG is not stochastic.
 
 utils/validate_lang.pl $lang_ # Note; this actually does report errors,
 
