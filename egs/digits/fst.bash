@@ -12,6 +12,17 @@ tmp_=$data_dir/local/tmp
 lang_l_=$data_dir/local/lang
 dict_=$data_dir/local/dict
 
+# Create symlinks to steps and utils from kaldi/egs/wsj/s5
+if [ ! -d steps ]
+then
+    ln -s $KALDI_ROOT/egs/wsj/s5/steps .
+fi
+
+if [ ! -d utils ]
+then
+    ln -s $KALDI_ROOT/egs/wsj/s5/utils .
+fi
+
 # Remove any existing build files
 rm -rf exp mfcc $train_/spk2utt $train_/cmvn.scp $train_/feats.scp $train_/split1 $test_/spk2utt $test_/cmvn.scp $test_/feats.scp $test_/split1 $lang_l_ $lang_ $tmp_ $dict_/lexiconp.txt
 
