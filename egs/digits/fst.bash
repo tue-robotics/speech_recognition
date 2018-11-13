@@ -38,7 +38,16 @@ rm -rf exp mfcc $train_/spk2utt $train_/cmvn.scp $train_/feats.scp $train_/split
 # Create directory to store temp files
 mkdir -p $tmp_
 
+echo
+echo -e "\e[35m\e[1m==== Preparing Lexicon (L.fst) ====\e[0m"
+echo
+
+# Make L.fst
 utils/prepare_lang.sh $dict_ '!SIL' $lang_l_ $lang_ || exit 1
+
+echo
+echo -e "\e[35m\e[1m==== Preparing Language Model (G.fst) ====\e[0m"
+echo
 
 # Check for the existence of SRILM
 # TODO: Replace this with IRSTLM to keep FOSS
@@ -65,11 +74,10 @@ then
     fi
 fi
 
+# Create LM in ARPA format
 ngram-count -order $lm_order -write-vocab $tmp_/vocab-full.txt -wbdiscount -text $local_/corpus.txt -lm $tmp_/lm.arpa
 
-echo
-echo "===== MAKING G.fst ====="
-echo
+# Make G.fst
 arpa2fst --disambig-symbol=#0 --read-symbol-table=$lang_/words.txt $tmp_/lm.arpa $lang_/G.fst
 
 # Checking that G is stochastic [note, it wouldn't be for an Arpa]
@@ -93,5 +101,6 @@ fsttablecompose $lang_/L.fst $lang_/G.fst | \
 fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
    fstisstochastic || echo Error: LG is not stochastic.
 
+# Validate lang directory
 utils/validate_lang.pl $lang_ # Note; this actually does report errors,
 
