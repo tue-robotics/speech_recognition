@@ -72,3 +72,26 @@ echo "===== MAKING G.fst ====="
 echo
 arpa2fst --disambig-symbol=#0 --read-symbol-table=$lang_/words.txt $tmp_/lm.arpa $lang_/G.fst
 
+# Checking that G is stochastic [note, it wouldn't be for an Arpa]
+fstisstochastic $lang_/G.fst || echo Error: G is not stochastic
+
+# Checking that G.fst is determinizable.
+fstdeterminize $lang_/G.fst /dev/null || echo Error determinizing G.
+
+# Checking that L_disambig.fst is determinizable.
+fstdeterminize $lang_/L_disambig.fst /dev/null || echo Error determinizing L.
+
+# Checking that disambiguated lexicon times G is determinizable
+fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
+   fstdeterminize >/dev/null || echo Error
+
+# Checking that LG is stochastic:
+fsttablecompose $lang_/L.fst $lang_/G.fst | \
+   fstisstochastic || echo Error: LG is not stochastic.
+
+# Checking that L_disambig.G is stochastic:
+fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
+   fstisstochastic || echo Error: LG is not stochastic.
+
+utils/validate_lang.pl $lang_ # Note; this actually does report errors,
+
