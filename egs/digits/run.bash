@@ -58,7 +58,7 @@ echo
 echo -e "\e[35m\e[1m==== Mono Decoding ====\e[0m"
 echo
 # Make decoding graph for monophone model
-utils/mkgraph.sh --mono $lang_ exp/mono exp/mono/graph || exit 1
+utils/mkgraph.sh $lang_ exp/mono exp/mono/graph || exit 1
 # Decode monophone model with test data
 steps/decode.sh --config conf/decode.config --nj $nj --cmd "$decode_cmd" exp/mono/graph $test_ exp/mono/decode
 
