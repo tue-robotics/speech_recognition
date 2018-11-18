@@ -82,6 +82,9 @@ utils/mkgraph.sh $lang_ exp/tri1 exp/tri1/graph || exit 1
 # Decode first pass triphone model with test data
 steps/decode.sh --config conf/decode.config --nj $nj --cmd "$decode_cmd" exp/tri1/graph $test_ exp/tri1/decode
 
+echo
+echo -e "\e[35m\e[1m==== Calculate Best Word Error Rate (WER) ====\e[0m"
+echo
 # Get WER
 for x in exp/*/decode*
 do
