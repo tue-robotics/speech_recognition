@@ -23,6 +23,14 @@ mfcc_=mfcc
 echo
 echo -e "\e[35m\e[1m==== Preparing Acoustic Data (spk2utt and data validation) ====\e[0m"
 echo
+
+# Prepare wav.scp file
+cp $train_/wav.scp.raw $train_/wav.scp
+cp $test_/wav.scp.raw $test_/wav.scp
+
+sed -i "s#<DATA_ROOT>#$DATA_ROOT#g" $train_/wav.scp
+sed -i "s#<DATA_ROOT>#$DATA_ROOT#g" $test_/wav.scp
+
 # Making spk2utt files
 utils/utt2spk_to_spk2utt.pl $train_/utt2spk > $train_/spk2utt
 utils/utt2spk_to_spk2utt.pl $test_/utt2spk > $test_/spk2utt
