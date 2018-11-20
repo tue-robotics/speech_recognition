@@ -33,7 +33,9 @@ then
 fi
 
 # Remove any existing build files
-rm -rf exp mfcc $train_/spk2utt $train_/cmvn.scp $train_/feats.scp $train_/split1 $test_/spk2utt $test_/cmvn.scp $test_/feats.scp $test_/split1 $lang_l_ $lang_ $tmp_ $dict_/lexiconp.txt
+rm -rf exp mfcc $train_/wav.scp $train_/spk2utt $train_/cmvn.scp \
+$train_/feats.scp $train_/split1 $test_/wav.scp $test_/spk2utt $test_/cmvn.scp \
+$test_/feats.scp $test_/split1 $lang_l_ $lang_ $tmp_ $dict_/lexiconp.txt
 
 # Create directory to store temp files
 mkdir -p $tmp_
