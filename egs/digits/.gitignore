@@ -2,3 +2,7 @@
 data/local/dict/lexiconp.txt
 spk2utt
 wav.scp
+
+# Ignore wav files
+all/
+wav/
