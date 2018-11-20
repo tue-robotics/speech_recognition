@@ -3,10 +3,6 @@
 build
 dev
 
-# ignore the wav files in digits directory in egs
-egs/digits/all
-egs/digits/wav
-
 # Kaldi specific files
 # Symlinks from main Kaldi repository
 steps
