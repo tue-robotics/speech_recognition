@@ -15,5 +15,12 @@ The installation can be tested by building a spoken digits recognition system:
 ./tests/digits.bash
 ```
 
+Upon completion, the last 4 lines displayed must be
+```
+%WER 12.00 [ 12 / 100, 0 ins, 0 del, 12 sub ] exp/mono/decode/wer_10
+%WER 6.00 [ 6 / 100, 0 ins, 0 del, 6 sub ] exp/tri1/decode/wer_10
+
+==== Execution completed ====
+```
 ## TODO
 1. Complete data preparation tools for the stored datasets
