@@ -15,6 +15,8 @@ train_=$data_dir/train
 test_=$data_dir/test
 local_=$data_dir/local
 dict_=$local_/dict
+wav_=$eg_dir/wav
+wav_all_=$eg_dir/all
 
 # Directories this script creates
 tmp_=$local_/tmp
@@ -30,6 +32,12 @@ fi
 if [ ! -d utils ]
 then
     ln -s $KALDI_ROOT/egs/wsj/s5/utils .
+fi
+
+# Check if the audio files directory exists
+if [ ! -d $wav_ -o ! -d $wav_all_ ]
+then
+    7z x audio_files.7z
 fi
 
 # Remove any existing build files
