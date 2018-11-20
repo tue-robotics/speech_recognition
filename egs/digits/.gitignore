@@ -1,3 +1,4 @@
 # Ignore directory specific build files
 data/local/dict/lexiconp.txt
 spk2utt
+wav.scp
