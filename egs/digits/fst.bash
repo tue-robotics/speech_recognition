@@ -79,7 +79,7 @@ then
         echo "Using SRILM language modelling tool from $sdir"
         export PATH=$PATH:$sdir
     else
-        echo "SRILM toolkit is probably not installed. Instructions: tools/install_srilm.sh"
+        echo "SRILM toolkit is probably not installed. Instructions: $KALDI_ROOT/tools/install_srilm.sh"
         exit 1
     fi
 fi
