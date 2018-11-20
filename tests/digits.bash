@@ -8,6 +8,7 @@
 if [ -z "$KALDI_ROOT" -o -z "$ASR_HOME" -o -z "$ASR_LOG" ]
 then
     echo -e "\e[35m\e[1m Environment variables do not exist \e[0m"
+    echo "Source setup.bash of this repository before executing this script"
     exit 1
 fi
 
