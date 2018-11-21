@@ -3,6 +3,16 @@
 build
 dev
 
-# ignore the digits directory in egs
-egs/digits/all
-egs/digits/wav
+# Kaldi specific files
+# Symlinks from main Kaldi repository
+steps
+utils
+# Build files from models
+mfcc/
+exp/
+**/data/lang/
+**/data/local/lang/
+**/data/local/tmp/
+**/cmvn.scp*
+**/feats.scp
+**/split1/

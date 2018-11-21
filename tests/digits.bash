@@ -5,21 +5,18 @@
 # Arpit Aggarwal
 # 2018 TechUnited @Home, TU Eindhoven
 
-if [ [ -z "$KALDI_ROOT" ] || [ -z "$ASR_HOME" ] || [ -z "$ASR_LOG" ] ]
+if [ -z "$KALDI_ROOT" -o -z "$ASR_HOME" -o -z "$ASR_LOG" ]
 then
-	echo -e "\e[35m\e[1m Environment variables do not exist \e[0m"
+    echo -e "\e[35m\e[1m Environment variables do not exist \e[0m"
+    echo "Source setup.bash of this repository before executing this script"
     exit 1
 fi
 
 echo -e "\e[33m\e[1m Testing Kaldi installation \e[0m"
 
-cd $ASR_HOME/egs
-tar -xvzf digits.tar.gz
-cd digits
-sed -i "1iexport KALDI_ROOT=$KALDI_ROOT" path.sh
+cd $ASR_HOME/egs/digits
 
-mkdir steps utils
-ln -s $KALDI/egs/wsj/s5/steps steps
-ln -s $KALDI/egs/wsj/s5/utils utils
-
+source path.sh
+./fst.bash
+./run.bash
 

@@ -1,9 +1,0 @@
-S01 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:4
-S02 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:247
-S03 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:490
-S04 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:733
-S05 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:976
-S06 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:1219
-S07 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:1462
-S08 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:1705
-S09 /home/bitmesra/repositories/kaldi/egs/digits/mfcc/cmvn_train_digits.ark:1948

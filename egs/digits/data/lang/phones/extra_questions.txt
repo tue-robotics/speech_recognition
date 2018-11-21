@@ -1,9 +1,0 @@
-a_B aa_B aan_B c_B ch_B d_B ee_B h_B ii_B k_B n_B o_B ou_B p_B r_B s_B sh_B t_B txh_B uu_B y_B 
-a_E aa_E aan_E c_E ch_E d_E ee_E h_E ii_E k_E n_E o_E ou_E p_E r_E s_E sh_E t_E txh_E uu_E y_E 
-a_I aa_I aan_I c_I ch_I d_I ee_I h_I ii_I k_I n_I o_I ou_I p_I r_I s_I sh_I t_I txh_I uu_I y_I 
-a_S aa_S aan_S c_S ch_S d_S ee_S h_S ii_S k_S n_S o_S ou_S p_S r_S s_S sh_S t_S txh_S uu_S y_S 
-sil 
-sil_B 
-sil_E 
-sil_I 
-sil_S 
