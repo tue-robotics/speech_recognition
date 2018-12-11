@@ -67,6 +67,8 @@ echo -e "\e[35m\e[1m==== Mono Decoding ====\e[0m"
 echo
 # Make decoding graph for monophone model
 utils/mkgraph.sh $lang_ exp/mono exp/mono/graph || exit 1
+echo
+
 # Decode monophone model with test data
 steps/decode.sh --config conf/decode.config --nj $nj --cmd "$decode_cmd" exp/mono/graph $test_ exp/mono/decode
 
@@ -87,6 +89,8 @@ echo -e "\e[35m\e[1m==== Tri1 Decoding ====\e[0m"
 echo
 # Make decoding graph for first pass triphone model
 utils/mkgraph.sh $lang_ exp/tri1 exp/tri1/graph || exit 1
+echo
+
 # Decode first pass triphone model with test data
 steps/decode.sh --config conf/decode.config --nj $nj --cmd "$decode_cmd" exp/tri1/graph $test_ exp/tri1/decode
 
