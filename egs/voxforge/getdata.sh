@@ -8,7 +8,7 @@
 # defines the "DATA_ROOT" variable - the location to store data 
 source ./path.sh
 
-DATA_SRC="http://www.repository.voxforge1.org/downloads/SpeechCorpus/Trunk/Audio/Main/16kHz_16bit"
+DATA_SRC="https://s3.us-east-2.amazonaws.com/common-voice-data-download/voxforge_corpus_v1.0.0.tar.gz"
 DATA_TGZ=${DATA_ROOT}
 DATA_EXTRACT=${DATA_ROOT}/extracted
 
