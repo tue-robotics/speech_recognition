@@ -20,7 +20,4 @@
   <depend>roslint</depend>
   <depend>rospy</depend>
 
-  <build_export_depend>roslint</build_export_depend>
-  <build_export_depend>rospy</build_export_depend>
-
 </package>
