@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 import logging
 
 import sys
@@ -5,8 +6,6 @@ import os
 from Queue import Queue
 from compiler.ast import flatten
 from dragonfly import Alternative, Sequence, Literal, Grammar, Rule, Optional, Repetition
-if os.name == 'nt':
-    sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/grammar_parser/src/")
 from grammar_parser.cfgparser import CFGParser
 
 FORMAT = '%(asctime)s %(module)s [%(levelname)s] %(message)s'
@@ -19,6 +18,7 @@ RULES = {}
 
 def _get_dragonfly_rule_element(target, parser, depth=0):
     global RULES
+    print(depth)
     if target not in parser.rules:
         raise Exception("Target {} not in parser rules".format(target))
 
@@ -48,7 +48,7 @@ def _get_dragonfly_rule_element(target, parser, depth=0):
                     conjunctions_list.append(result)
             else:
                 # Add a new literal to the list
-                RULES[conj.name] = Literal(conj.name)
+                RULES[conj.name] = conj.name
                 conjunctions_list.append(RULES[conj.name])
                 logger.debug("Adding literal rule: %s",  conj.name)
 
@@ -56,12 +56,12 @@ def _get_dragonfly_rule_element(target, parser, depth=0):
         if len(conjunctions_list) == 1:
             option_alternative_list.append(conjunctions_list[0])
         else:
-            option_alternative_list.append(Sequence(conjunctions_list))
+            option_alternative_list.append(tuple(conjunctions_list))
 
     if len(option_alternative_list) == 1:
         RULES[target] = option_alternative_list[0]
     else:
-        RULES[target] = Alternative(option_alternative_list)
+        RULES[target] = option_alternative_list
 
     logger.debug("Adding alternative rule: %s", target)
     return RULES[target]
@@ -101,4 +101,20 @@ def get_dragonfly_grammar(grammar, target, result_queue):
 
     return dragonfly_grammar
 
+if __name__ == "__main__":
+    import sys
+    import pprint
+
+    grammar_file = sys.argv[1]
+    target = sys.argv[2]
+
+#    with open(grammar_file) as f:
+#        grammar = f.read()
+
+#    parser = CFGParser.fromstring(grammar)
+    parser = CFGParser.fromfile(grammar_file)
+
+
+    df_grammar = _get_dragonfly_rule_element(target, parser)
+    pprint.pprint(df_grammar)
 
