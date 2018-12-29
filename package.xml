@@ -19,5 +19,8 @@
 
   <depend>roslint</depend>
   <depend>rospy</depend>
+  <depend>grammar_parser</depend>
+  <depend>audio_capture</depend>
+  <depend>kaldi</depend>
 
 </package>
