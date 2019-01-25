@@ -100,6 +100,4 @@ if __name__ == '__main__':
     King Solomon's Mines" (http://www.gutenberg.org/ebooks/2166).
     You may want to read some sentences from this book first ...'''
 
-    while not rospy.is_shutdown():
-        app.rate.sleep()
-        pass
+    rospy.spin()
