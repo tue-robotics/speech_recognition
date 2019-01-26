@@ -93,8 +93,8 @@ if __name__ == '__main__':
     GObject.threads_init()
     Gst.init(sys.argv)
 
-    app = DemoApp()
     rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
+    app = DemoApp()
 
     print '''
     The (bigram) language model used to build the decoding graph was
