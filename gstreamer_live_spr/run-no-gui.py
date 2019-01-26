@@ -13,8 +13,6 @@ import rospy
 from std_msgs.msg import String
 gi.require_version('Gst', '1.0')
 from gi.repository import GObject, Gst
-GObject.threads_init()
-Gst.init(None)
 
 
 class DemoApp(object):
@@ -29,7 +27,7 @@ class DemoApp(object):
         self.pulsesrc = Gst.ElementFactory.make("pulsesrc", "pulsesrc")
         if self.pulsesrc == None:
             print >> sys.stderr, "Error loading pulsesrc GST plugin. You probably need the gstreamer1.0-pulseaudio package"
-            sys.exit()	
+            sys.exit(1)
         self.audioconvert = Gst.ElementFactory.make("audioconvert", "audioconvert")
         self.audioresample = Gst.ElementFactory.make("audioresample", "audioresample")    
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
@@ -55,7 +53,7 @@ class DemoApp(object):
             else:
               print >> sys.stderr, "You probably need to set the GST_PLUGIN_PATH environment variable"
               print >> sys.stderr, "Try running: export GST_PLUGIN_PATH=$KALDI_ROOT/src/gst-plugin"
-            sys.exit()
+            sys.exit(1)
 
         # Generate Gstreamer pipeline (from source to sink)
         self.pipeline = Gst.Pipeline()
@@ -71,8 +69,6 @@ class DemoApp(object):
     def init_talker(self):
         self.pub_str = ""
         self.pub = rospy.Publisher('kaldi_spr', String, queue_size=10)
-        rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
-        self.rate = rospy.Rate(1)  # 1hz
 
     def _on_word_publish(self, asr, word):
         # Publish only when a pause has been registered (might be less robust than single words when pauses are not
@@ -93,7 +89,13 @@ class DemoApp(object):
 
 
 if __name__ == '__main__':
+    # Initialize gstreamer library using threads
+    GObject.threads_init()
+    Gst.init(sys.argv)
+
     app = DemoApp()
+    rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
+
     print '''
     The (bigram) language model used to build the decoding graph was
     estimated on an audio book's text. The text in question is
