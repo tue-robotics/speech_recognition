@@ -1,43 +1,53 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2013 Tanel Alumae
-#
-# Slightly inspired by the CMU Sphinx's Pocketsphinx Gstreamer plugin demo (which has BSD license)
-#
-# Apache 2.0
+
+# Make python 2/3 compatible
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import *
 
 import sys
 import os
 import gi
-import rospy
-from std_msgs.msg import String
 gi.require_version('Gst', '1.0')
 from gi.repository import GObject, Gst
 
+# ROS imports
+# TODO: Move to different script
+import rospy
+from std_msgs.msg import String
 
-class DemoApp(object):
-    """GStreamer/Kaldi Demo Application"""
+
+class KaldiGstApp:
+    """Kaldi Gstreamer Application"""
+    # TODO: Make model directory as an input argument and move talker to
+    # separate class
     def __init__(self):
-        """Initialize a DemoApp object"""
+        """Initialize a KaldiGstApp object"""
         self.init_gst()
         self.init_talker()
+
+    def error(self, *args, **kwargs):
+        """Print errors to stderr and exit program"""
+        print("[Kaldi]", *args, file=sys.stderr, **kwargs)
+        sys.exit(1)
 
     def init_gst(self):
         """Initialize the speech components"""
         self.pulsesrc = Gst.ElementFactory.make("pulsesrc", "pulsesrc")
         if self.pulsesrc == None:
-            print >> sys.stderr, "Error loading pulsesrc GST plugin. You probably need the gstreamer1.0-pulseaudio package"
-            sys.exit(1)
+            self.error("Error loading pulsesrc GST plugin. You probably need the gstreamer1.0-pulseaudio package")
+
         self.audioconvert = Gst.ElementFactory.make("audioconvert", "audioconvert")
-        self.audioresample = Gst.ElementFactory.make("audioresample", "audioresample")    
+        self.audioresample = Gst.ElementFactory.make("audioresample", "audioresample")
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
         self.fakesink = Gst.ElementFactory.make("fakesink", "fakesink")
-        
+
         if self.asr:
             model_dir = "online-data/models/tri2b_mmi/"  # Current test directory
             if not os.path.isdir(model_dir):
-                print >> sys.stderr, "Model (%s) not downloaded. Run run-simulated.sh first" % model_dir
-                sys.exit(1)
+                self.error("Model (%s) not downloaded. Run run-simulated.sh first" % model_dir)
+
             self.asr.set_property("fst", model_dir + "HCLG.fst")
             self.asr.set_property("lda-mat", model_dir + "matrix")
             self.asr.set_property("model", model_dir + "model")
@@ -47,13 +57,12 @@ class DemoApp(object):
             self.asr.set_property("beam", 12.0)
             self.asr.set_property("acoustic-scale", 0.0769)
         else:
-            print >> sys.stderr, "Couldn't create the onlinegmmfasterdecoder element. "
+            print_msg = "Couldn't create the onlinegmmfasterdecoder element.\n"
             if "GST_PLUGIN_PATH" in os.environ:
-              print >> sys.stderr, "Have you compiled the Kaldi GStreamer plugin?"
+              print_msg += "Kaldi Gstreamer Plugin probably not compiled."
             else:
-              print >> sys.stderr, "You probably need to set the GST_PLUGIN_PATH environment variable"
-              print >> sys.stderr, "Try running: export GST_PLUGIN_PATH=$KALDI_ROOT/src/gst-plugin"
-            sys.exit(1)
+              print_msg += "GST_PLUGIN_PATH unset.\nTry running: export GST_PLUGIN_PATH=$KALDI_ROOT/src/gst-plugin"
+            self.error(print_msg)
 
         # Generate Gstreamer pipeline (from source to sink)
         self.pipeline = Gst.Pipeline()
@@ -94,12 +103,6 @@ if __name__ == '__main__':
     Gst.init(sys.argv)
 
     rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
-    app = DemoApp()
-
-    print '''
-    The (bigram) language model used to build the decoding graph was
-    estimated on an audio book's text. The text in question is
-    King Solomon's Mines" (http://www.gutenberg.org/ebooks/2166).
-    You may want to read some sentences from this book first ...'''
+    app = KaldiGstApp()
 
     rospy.spin()
