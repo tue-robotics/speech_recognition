@@ -13,14 +13,13 @@
   <author email="ar13pit@gmail.com">Arpit Aggarwal</author>
 
 
-  <!--   <test_depend>gtest</test_depend> -->
-  <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>grammar_parser</depend>
+  <depend>kaldi</depend>
+  <depend>python-future</depend>
+  <depend>python-gi</depend>
   <depend>roslint</depend>
   <depend>rospy</depend>
-  <depend>grammar_parser</depend>
-  <depend>audio_capture</depend>
-  <depend>kaldi</depend>
 
 </package>
