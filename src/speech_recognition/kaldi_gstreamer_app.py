@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 import sys
+import argparse
 import os
 import gi
 gi.require_version('Gst', '1.0')
@@ -22,9 +23,9 @@ class KaldiGstApp:
     """Kaldi Gstreamer Application"""
     # TODO: Make model directory as an input argument and move talker to
     # separate class
-    def __init__(self):
+    def __init__(self, model_path):
         """Initialize a KaldiGstApp object"""
-        self.init_gst()
+        self.init_gst(model_path)
         self.init_talker()
 
     def error(self, *args, **kwargs):
@@ -32,7 +33,7 @@ class KaldiGstApp:
         print("[Kaldi]", *args, file=sys.stderr, **kwargs)
         sys.exit(1)
 
-    def init_gst(self):
+    def init_gst(self, model_path):
         """Initialize the speech components"""
         self.pulsesrc = Gst.ElementFactory.make("pulsesrc", "pulsesrc")
         if self.pulsesrc == None:
@@ -44,14 +45,13 @@ class KaldiGstApp:
         self.fakesink = Gst.ElementFactory.make("fakesink", "fakesink")
 
         if self.asr:
-            model_dir = "online-data/models/tri2b_mmi/"  # Current test directory
-            if not os.path.isdir(model_dir):
-                self.error("Model (%s) not downloaded. Run run-simulated.sh first" % model_dir)
+            if not os.path.isdir(model_path):
+                self.error("Model (%s) not downloaded. Run run-simulated.sh first" % model_path)
 
-            self.asr.set_property("fst", model_dir + "HCLG.fst")
-            self.asr.set_property("lda-mat", model_dir + "matrix")
-            self.asr.set_property("model", model_dir + "model")
-            self.asr.set_property("word-syms", model_dir + "words.txt")
+            self.asr.set_property("fst", model_path + "HCLG.fst")
+            self.asr.set_property("lda-mat", model_path + "matrix")
+            self.asr.set_property("model", model_path + "model")
+            self.asr.set_property("word-syms", model_path + "words.txt")
             self.asr.set_property("silence-phones", "1:2:3:4:5")
             self.asr.set_property("max-active", 4000)
             self.asr.set_property("beam", 12.0)
@@ -98,11 +98,16 @@ class KaldiGstApp:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="ROS Publisher for Gstreamer-Kaldi plugin.")
+    parser.add_argument("model", type=str, help='Model path')
+    arguments = parser.parse_args()
+    model = arguments.model
+
     # Initialize gstreamer library using threads
     GObject.threads_init()
     Gst.init(sys.argv)
 
     rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
-    app = KaldiGstApp()
+    app = KaldiGstApp(model)
 
     rospy.spin()
