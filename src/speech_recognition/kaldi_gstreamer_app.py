@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#
 
 # Make python 2/3 compatible
 from __future__ import (absolute_import, division,
@@ -9,40 +8,30 @@ from builtins import *
 import sys
 import argparse
 import os
+
+# Gstreamer imports
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import GObject, Gst
 
 # ROS imports
-# TODO: Move to different script
 import rospy
 from std_msgs.msg import String
 
+# Import classes
+from gstreamer_app import GstApp
+from kaldi_ros_publisher import KaldiROSPub
 
-class KaldiGstApp:
+
+class KaldiGstApp(GstApp, KaldiROSPub):
     """Kaldi Gstreamer Application"""
-    # TODO: Make model directory as an input argument and move talker to
-    # separate class
     def __init__(self, model_path):
         """Initialize a KaldiGstApp object"""
-        self.init_gst(model_path)
-        self.init_talker()
+        GstApp.__init__(self)
+        KaldiROSPub.__init__(self)
 
-    def error(self, *args, **kwargs):
-        """Print errors to stderr and exit program"""
-        print("[Kaldi]", *args, file=sys.stderr, **kwargs)
-        sys.exit(1)
-
-    def init_gst(self, model_path):
-        """Initialize the speech components"""
-        self.pulsesrc = Gst.ElementFactory.make("pulsesrc", "pulsesrc")
-        if self.pulsesrc == None:
-            self.error("Error loading pulsesrc GST plugin. You probably need the gstreamer1.0-pulseaudio package")
-
-        self.audioconvert = Gst.ElementFactory.make("audioconvert", "audioconvert")
-        self.audioresample = Gst.ElementFactory.make("audioresample", "audioresample")
+        self.type = 'Kaldi-Gst-App'
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
-        self.fakesink = Gst.ElementFactory.make("fakesink", "fakesink")
 
         if self.asr:
             if not os.path.isdir(model_path):
@@ -64,37 +53,12 @@ class KaldiGstApp:
               print_msg += "GST_PLUGIN_PATH unset.\nTry running: export GST_PLUGIN_PATH=$KALDI_ROOT/src/gst-plugin"
             self.error(print_msg)
 
-        # Generate Gstreamer pipeline (from source to sink)
-        self.pipeline = Gst.Pipeline()
-        for element in [self.pulsesrc, self.audioconvert, self.audioresample, self.asr, self.fakesink]:
-            self.pipeline.add(element)
-        self.pulsesrc.link(self.audioconvert)
-        self.audioconvert.link(self.audioresample)
+        # Complete Gstreamer pipeline and start playing
+        self.pipeline.add(self.asr)
         self.audioresample.link(self.asr)
         self.asr.link(self.fakesink)
         self.asr.connect('hyp-word', self._on_word_publish)
         self.pipeline.set_state(Gst.State.PLAYING)
-
-    def init_talker(self):
-        self.pub_str = ""
-        self.pub = rospy.Publisher('kaldi_spr', String, queue_size=10)
-
-    def _on_word_publish(self, asr, word):
-        # Publish only when a pause has been registered (might be less robust than single words when pauses are not
-        # recognized due to, e.g., too much noise or talking in the background):
-        if word == "<#s>":                              # Silence
-            # rospy.loginfo(self.pub_str)               # For testing purposes
-            self.pub.publish(self.pub_str)
-            self.pub_str = ""
-        elif self.pub_str == "":                        # No spaces at start of new sentence
-            self.pub_str = self.pub_str + word
-        else:
-            self.pub_str = self.pub_str + " " + word
-
-        # Publish single words:
-        # if not word == "<#s>":
-        #     # rospy.loginfo(word)
-        #     self.pub.publish(word)
 
 
 if __name__ == '__main__':
