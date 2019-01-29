@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
-# catkin_python_setup()
+catkin_python_setup()
 
 ###################################
 ## catkin specific configuration ##

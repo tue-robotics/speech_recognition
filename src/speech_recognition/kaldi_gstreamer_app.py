@@ -19,8 +19,8 @@ import rospy
 from std_msgs.msg import String
 
 # Import classes
-from gstreamer_app import GstApp
-from kaldi_ros_publisher import KaldiROSPub
+from speech_recognition.gstreamer_app import GstApp
+from speech_recognition.kaldi_ros_publisher import KaldiROSPub
 
 
 class KaldiGstApp(GstApp, KaldiROSPub):
@@ -64,14 +64,13 @@ class KaldiGstApp(GstApp, KaldiROSPub):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="ROS Publisher for Gstreamer-Kaldi plugin.")
     parser.add_argument("model", type=str, help='Model path')
-    arguments = parser.parse_args()
-    model = arguments.model
+    args = parser.parse_args()
 
     # Initialize gstreamer library using threads
     GObject.threads_init()
     Gst.init(sys.argv)
 
     rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
-    app = KaldiGstApp(model)
+    app = KaldiGstApp(args.model)
 
     rospy.spin()
