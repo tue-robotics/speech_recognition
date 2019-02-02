@@ -6,6 +6,10 @@ then
     exit 1
 fi
 
+mkdir -p bin build
+BIN=bin
+BUILD=build
+
 # Make . the split character
 IFS="."
 inputFilenameParts=($1)
@@ -18,10 +22,10 @@ type=${inputFilenameParts[1]}
 echo 'Preparing: '$name
 
 fsTextFile="${name}.${type}.txt"
-fsFile="$name.${type}"
-osymsFile="${name}.osyms"
-isymsFile="${name}.isyms"
-svgOutputFile="${name}.svg"
+fsFile="$BIN/$name.${type}"
+osymsFile="$BUILD/${name}.osyms"
+isymsFile="$BUILD/${name}.isyms"
+svgOutputFile="$BIN/${name}.svg"
 
 isymbols="--isymbols=${isymsFile}"
 osymbols="--osymbols=${osymsFile}"
