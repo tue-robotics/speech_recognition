@@ -5,4 +5,5 @@
 0 0 N mouse
 0 0 V chased
 0 0 V bit
+0 0 AND and
 0
