@@ -5,6 +5,40 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
 
+import os.path
+import sys
+
+class FstCompiler:
+    """A class to generate fst binaries from raw text files or strings"""
+    def __init__(self, fpath):
+        fname_split = os.path.basename(fpath).split('.')
+        try:
+            fname = fname_split[0]
+            fstype = fname_split[1]
+            fext = fname_split[2]
+
+            if not fext == ".txt":
+                self.error("Incorrect extension '{}' of '{}'. Need '.txt' file".format(fext, fpath))
+
+            if not (fstype == "fsa" or fstype == "fst"):
+                self.error("Unknown fst type '{}' in '{}'. Should either be 'fst' or 'fsa'".format(fstype, fpath))
+
+        except:
+            self.error("Error! Incorrect input file '{}'. Check usage to understand the correct file input".format(fpath))
+
+        self.fpath = fpath
+        self.fname = fname
+        self.fstype = fstype
+
+        self.fsFile = self.fname + self.fstype
+        self.isymsFile = self.fname + "isyms"
+        self.osymsFile = self.fname + "osyms"
+
+    def error(self, *args, *kwargs):
+        """Error function of FstCompiler class"""
+        print("[Kaldi-Grammar_Parser]", *args, file=sys.stderr, **kwargs)
+        sys.exit(1)
+
 
 class FsSymbolGenerator:
     """A class to generate the symbols file from FSA/FST text files to use with
@@ -13,12 +47,12 @@ class FsSymbolGenerator:
         self.fname = fname
         self.fieldNumber = fieldNumber
 
-    def generate(self):
+    def generate(self, fieldNumbers):
         """Function to generate the symbols file"""
         words = set()
 
-        with open(self.fname, 'r') as fsfile:
-            for line in fsfile:
+        with open(self.fpath, 'r') as fsfiletxt:
+            for line in fsfiletxt:
                 fields = line.split(' ')
                 if len(fields) > self.fieldNumber:
                     field = fields[self.fieldNumber].strip()
