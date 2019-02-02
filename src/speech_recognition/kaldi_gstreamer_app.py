@@ -31,6 +31,7 @@ class KaldiGstApp(GstApp, KaldiROSPub):
         KaldiROSPub.__init__(self)
 
         self.type = 'Kaldi-Gst-App'
+        self.sentence = None
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
 
         if self.asr:
@@ -57,8 +58,20 @@ class KaldiGstApp(GstApp, KaldiROSPub):
         self.pipeline.add(self.asr)
         self.audioresample.link(self.asr)
         self.asr.link(self.fakesink)
-        self.asr.connect('hyp-word', self._on_word_publish)
-        self.pipeline.set_state(Gst.State.PLAYING)
+        # self.asr.connect('hyp-word', self._on_word_publish)
+        # self.pipeline.set_state(Gst.State.PLAYING)
+
+    def wait_for_sentence(self, asr, word):
+        # Publish only when a pause has been registered (might be less robust than single words when pauses are not
+        # recognized due to, e.g., too much noise or talking in the background):
+        if word == "<#s>":                              # Silence
+            self.sentence = self.pub_str
+            rospy.loginfo(self.sentence)
+            self.pub_str = ""
+        elif self.pub_str == "":                        # No spaces at start of new sentence
+            self.pub_str = self.pub_str + word
+        else:
+            self.pub_str = self.pub_str + " " + word
 
 
 if __name__ == '__main__':

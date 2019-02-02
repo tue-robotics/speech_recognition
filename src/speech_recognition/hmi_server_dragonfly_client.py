@@ -34,3 +34,9 @@ class HMIServerDragonflyClient(AbstractHMIServer):
         c = DragonflyClient(*self._address)
         c.restart_node()
         return {}
+
+
+if __name__ == "__main__":
+    rospy.init_node('hmi_server_dragonfly_client')
+    c = HMIServerDragonflyClient()
+    rospy.spin()
