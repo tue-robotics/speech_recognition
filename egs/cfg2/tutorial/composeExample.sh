@@ -12,13 +12,13 @@ bash compileAndDraw.sh dict.fst
 fstcompose --fst_compat_symbols=false $BIN/sent.fsa $BIN/dict.fst > $BIN/strings.fst
 fstdraw --portrait  $BIN/strings.fst | dot -Tsvg >  $BIN/strings.svg
 
-echo 'Done composing: outputted strings.svg'
+echo "Done composing. Output is at $BIN/strings.svg"
 echo 'Example sentences:'
 echo '------------------'
 
 for i in $(seq 1 10)
 do
-    fstrandgen --seed=$RANDOM $BUILD/strings.fst | fstproject --project_output |
-    fstprint --acceptor --isymbols=dict.syms |
+    fstrandgen --seed=$RANDOM $BIN/strings.fst | fstproject --project_output |
+    fstprint --acceptor --isymbols="$BUILD/dict.osyms" |
     awk '{printf("%s ",$3)}END{printf("\n")}'
 done
