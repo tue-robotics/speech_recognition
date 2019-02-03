@@ -34,36 +34,49 @@ class FstCompiler:
         self.isymsFile = self.fname + "isyms"
         self.osymsFile = self.fname + "osyms"
 
+    def generateSymsFiles(self):
+        """Method to generate the symbols files isyms and osyms"""
+        words = set()
+
+        self.isymsFileHandle = open(self.isymsFile, 'w')
+        self.isymsFileHandle.write("- 0")
+
+        # FSAs have only one field, hence 2 by default is added
+        self.fieldFileDict = {2: self.isymsFileHandle}
+
+        # FSTs have two fields
+        if self.fstype == "fst":
+            self.osymsFileHandle = open(self.osymsFile, 'w')
+            self.osymsFileHandle.write("- 0")
+            self.fieldFileDict[3] = self.osymsFileHandle
+
+        # Read the raw text file
+        with open(self.fpath, 'r') as fsfiletxt:
+            lines = fsfiletxt.readlines()
+            lines = [line.strip().split(' ') for line in lines]
+
+        for index in self.fieldFileDict:
+            fh = self.fieldFileDict[index]
+            field_count = 1
+            for line in lines:
+                try:
+                    field = line[index]
+                except:
+                    pass
+                else:
+                    fh.write("{} {}".format(field_count + 1, field))
+            fh.close()
+
+    def compile(self):
+        """Method to compile FSA/FST after generating symbols files using
+        generateSymsFiles"""
+
+
     def error(self, *args, *kwargs):
         """Error function of FstCompiler class"""
         print("[Kaldi-Grammar_Parser]", *args, file=sys.stderr, **kwargs)
         sys.exit(1)
 
-
-class FsSymbolGenerator:
-    """A class to generate the symbols file from FSA/FST text files to use with
-    OpenFST"""
-    def __init__(self, fname, fieldNumber):
-        self.fname = fname
-        self.fieldNumber = fieldNumber
-
-    def generate(self, fieldNumbers):
-        """Function to generate the symbols file"""
-        words = set()
-
-        with open(self.fpath, 'r') as fsfiletxt:
-            for line in fsfiletxt:
-                fields = line.split(' ')
-                if len(fields) > self.fieldNumber:
-                    field = fields[self.fieldNumber].strip()
-                    if (field):
-                        words.add(field)
-
-            # Always have the empty string as 0
-            print("- 0")
-            words.discard('-')
-            for (ii, word) in enumerate(words, 1):
-                print("%s %d" % (word, ii))
 
 
 if __name__ == "__main__":
