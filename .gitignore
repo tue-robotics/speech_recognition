@@ -1,6 +1,7 @@
 # ignore all build, dev and log directories
 **/log
 build
+bin
 dev
 
 # Kaldi specific files
