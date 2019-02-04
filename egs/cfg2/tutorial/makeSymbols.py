@@ -10,7 +10,12 @@ import sys
 
 class FstCompiler:
     """A class to generate fst binaries from raw text files or strings"""
-    def __init__(self, fpath):
+    def __init__(self, fpath, outpath):
+        if not os.path.exists(fpath):
+            self.error("File path '{}' does not exist".format(fpath))
+
+
+
         fname_split = os.path.basename(fpath).split('.')
         try:
             fname = fname_split[0]
@@ -72,10 +77,14 @@ class FstCompiler:
         generateSymsFiles"""
 
 
-    def error(self, *args, *kwargs):
+    def error(self, *args, **kwargs):
         """Error function of FstCompiler class"""
         print("[Kaldi-Grammar_Parser]", *args, file=sys.stderr, **kwargs)
         sys.exit(1)
+
+    def warning(self, *args, **kwargs):
+        """Warning method of FstCompiler class"""
+        print("[Kaldi-Grammar_Parser]", *args, file=sys.stdout, **kwargs)
 
 
 
