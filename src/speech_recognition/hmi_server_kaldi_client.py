@@ -38,29 +38,3 @@ class HMIServerKaldiClient(AbstractHMIServer):
             print(kaldi_app.sentence)
             return HMIResult(kaldi_app.sentence, "")
         return None
-
-
-# if __name__ == "__main__":
-#     rospy.init_node('hmi_server_kaldi_client')
-#     os.environ['GST_PLUGIN_PATH'] = "/home/amigo/src/kaldi_speech/src/gst-plugin/"
-#
-#     # Initialize gstreamer library using threads
-#     GObject.threads_init()
-#     Gst.init(sys.argv)
-#
-#     # Set test model path
-#     rospy.set_param("/kaldi_model_path", "/home/amigo/ros/kinetic/repos/https_/github.com/tue-robotics/"
-#                                          "speech_recognition.git/gstreamer_live_spr/online-data/models/tri2b_mmi/")
-#     c = HMIServerKaldiClient()
-#
-#     # Generate some required parameters.
-#     description = ""
-#     grammar = ""
-#     target = ""
-#     is_preempt_requested = False
-#
-#     # Run the _determine_answer function once to recognize a command (single sentence/request)
-#     c._determine_answer(description, grammar, target, is_preempt_requested)
-#
-#     print("Finished.")
-#     rospy.spin()
