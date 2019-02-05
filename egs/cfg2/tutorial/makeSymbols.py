@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
 
-import os.path
+import os
 import sys
 
 class FstCompiler:
@@ -14,7 +14,13 @@ class FstCompiler:
         if not os.path.exists(fpath):
             self.error("File path '{}' does not exist".format(fpath))
 
+        self.fpath = fpath
 
+        if not os.path.isdir(outpath):
+            self.warning("'{}' does not exist".format(outpath))
+            os.makedirs(outpath)
+
+        self.outpath = outpath
 
         fname_split = os.path.basename(fpath).split('.')
         try:
@@ -31,17 +37,15 @@ class FstCompiler:
         except:
             self.error("Error! Incorrect input file '{}'. Check usage to understand the correct file input".format(fpath))
 
-        self.fpath = fpath
         self.fname = fname
         self.fstype = fstype
 
-        self.fsFile = self.fname + self.fstype
-        self.isymsFile = self.fname + "isyms"
-        self.osymsFile = self.fname + "osyms"
+        self.fsFile = os.path.join(self.outpath, self.fname + "." + self.fstype)
+        self.isymsFile = os.path.join(self.outpath, self.fname + ".isyms")
+        self.osymsFile = os.path.join(self.outpath, self.fname + ".osyms")
 
     def generateSymsFiles(self):
         """Method to generate the symbols files isyms and osyms"""
-        words = set()
 
         self.isymsFileHandle = open(self.isymsFile, 'w')
         self.isymsFileHandle.write("- 0")
