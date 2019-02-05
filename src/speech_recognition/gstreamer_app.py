@@ -18,7 +18,7 @@ class GstApp:
         self.type = 'Gstreamer'
         self.pulsesrc = Gst.ElementFactory.make("pulsesrc", "pulsesrc")
         if self.pulsesrc is None:
-            self.error("Error loading pulsesrc GST plugin. You probably need the gstreamer1.0-pulseaudio package")
+            self._error("Error loading pulsesrc GST plugin. You probably need the gstreamer1.0-pulseaudio package")
 
         self.audioconvert = Gst.ElementFactory.make("audioconvert", "audioconvert")
         self.audioresample = Gst.ElementFactory.make("audioresample", "audioresample")
@@ -31,7 +31,7 @@ class GstApp:
         self.pulsesrc.link(self.audioconvert)
         self.audioconvert.link(self.audioresample)
 
-    def error(self, *args, **kwargs):
+    def _error(self, *args, **kwargs):
         """Print errors to stderr and exit program"""
         print("[{}]".format(self.type), *args, file=sys.stderr, **kwargs)
         sys.exit(1)

@@ -16,27 +16,25 @@ from gi.repository import GObject, Gst
 
 # ROS imports
 import rospy
-from std_msgs.msg import String
 
 # Import classes
 from speech_recognition.gstreamer_app import GstApp
-from speech_recognition.kaldi_ros_publisher import KaldiROSPub
 
 
-class KaldiGstApp(GstApp, KaldiROSPub):
+class KaldiGstApp(GstApp):
     """Kaldi Gstreamer Application"""
     def __init__(self, model_path):
         """Initialize a KaldiGstApp object"""
         GstApp.__init__(self)
-        KaldiROSPub.__init__(self)
 
         self.type = 'Kaldi-Gst-App'
+        self.pub_str = ""
         self.sentence = None
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
 
         if self.asr:
             if not os.path.isdir(model_path):
-                self.error("Model (%s) not downloaded. Run run-simulated.sh first" % model_path)
+                self._error("Model (%s) not downloaded. Run run-simulated.sh first" % model_path)
 
             self.asr.set_property("fst", model_path + "HCLG.fst")
             self.asr.set_property("lda-mat", model_path + "matrix")
@@ -52,16 +50,18 @@ class KaldiGstApp(GstApp, KaldiROSPub):
               print_msg += "Kaldi Gstreamer Plugin probably not compiled."
             else:
               print_msg += "GST_PLUGIN_PATH unset.\nTry running: export GST_PLUGIN_PATH=$KALDI_ROOT/src/gst-plugin"
-            self.error(print_msg)
+            self._error(print_msg)
 
         # Complete Gstreamer pipeline and start playing
         self.pipeline.add(self.asr)
         self.audioresample.link(self.asr)
         self.asr.link(self.fakesink)
-        # self.asr.connect('hyp-word', self._on_word_publish)
-        # self.pipeline.set_state(Gst.State.PLAYING)
+        self.asr.connect('hyp-word', self._wait_for_sentence)
+        self.pipeline.set_state(Gst.State.PLAYING)
 
-    def wait_for_sentence(self, asr, word):
+    def _wait_for_sentence(self, asr, word):
+        # TODO: If the 'word' input changes from single words to a sentence (i.e. if the c++ file of the Gstreamer-kaldi
+        #   -plugin is edited to push out sentences instead of words) then this function should change
         # Publish only when a pause has been registered (might be less robust than single words when pauses are not
         # recognized due to, e.g., too much noise or talking in the background):
         if word == "<#s>":                              # Silence
@@ -69,21 +69,21 @@ class KaldiGstApp(GstApp, KaldiROSPub):
             rospy.loginfo(self.sentence)
             self.pub_str = ""
         elif self.pub_str == "":                        # No spaces at start of new sentence
-            self.pub_str = self.pub_str + word
+            self.pub_str += word
         else:
-            self.pub_str = self.pub_str + " " + word
+            self.pub_str += " " + word
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="ROS Publisher for Gstreamer-Kaldi plugin.")
-    parser.add_argument("model", type=str, help='Model path')
-    args = parser.parse_args()
-
-    # Initialize gstreamer library using threads
-    GObject.threads_init()
-    Gst.init(sys.argv)
-
-    rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
-    app = KaldiGstApp(args.model)
-
-    rospy.spin()
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(description="ROS Publisher for Gstreamer-Kaldi plugin.")
+#     parser.add_argument("model", type=str, help='Model path')
+#     args = parser.parse_args()
+#
+#     # Initialize gstreamer library using threads
+#     GObject.threads_init()
+#     Gst.init(sys.argv)
+#
+#     rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
+#     app = KaldiGstApp(args.model)
+#
+#     rospy.spin()
