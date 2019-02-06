@@ -14,20 +14,5 @@ catkin_python_setup()
 ###################################
 ## catkin specific configuration ##
 ###################################
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES speech_recognition
-#  CATKIN_DEPENDS roslint rospy
-#  DEPENDS system_lib
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
-)
+catkin_package()
 
