@@ -90,26 +90,36 @@ ngram-count -order $lm_order -write-vocab $tmp_/vocab-full.txt -wbdiscount -text
 # Make G.fst
 arpa2fst --disambig-symbol=#0 --read-symbol-table=$lang_/words.txt $tmp_/lm.arpa $lang_/G.fst
 
+echo
+echo -e "\e[35m\e[1m==== Checking FSTs (L.fst, L_disambig.fst, G.fst) ====\e[0m"
+echo
+
 # Checking that G is stochastic [note, it wouldn't be for an Arpa]
-fstisstochastic $lang_/G.fst || echo Error: G is not stochastic
+echo "Check if G.fst is stochastic (it wouldn't be for an Arpa)"
+fstisstochastic $lang_/G.fst || echo "Error: G is not stochastic"
+echo
 
 # Checking that G.fst is determinizable.
-fstdeterminize $lang_/G.fst /dev/null || echo Error determinizing G.
+echo "Check if G.fst is determinizable"
+fstdeterminize $lang_/G.fst || echo "Error determinizing G."
+echo
 
 # Checking that L_disambig.fst is determinizable.
-fstdeterminize $lang_/L_disambig.fst /dev/null || echo Error determinizing L.
+echo "Check if L_disambig.fst is determinizable"
+fstdeterminize $lang_/L_disambig.fst /dev/null || echo "Error determinizing L."
+echo
 
 # Checking that disambiguated lexicon times G is determinizable
 fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
-   fstdeterminize >/dev/null || echo Error
+   fstdeterminize >/dev/null || echo "Error"
 
 # Checking that LG is stochastic:
 fsttablecompose $lang_/L.fst $lang_/G.fst | \
-   fstisstochastic || echo Error: LG is not stochastic.
+   fstisstochastic || echo "Error: LG is not stochastic."
 
 # Checking that L_disambig.G is stochastic:
 fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
-   fstisstochastic || echo Error: LG is not stochastic.
+   fstisstochastic || echo "Error: LG is not stochastic."
 
 # Validate lang directory
 utils/validate_lang.pl $lang_ # Note; this actually does report errors,
