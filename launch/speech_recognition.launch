@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <launch>
 
-	<!-- Get the machine file -->
-	<arg name="machine" default="localhost"/>
-	<include file="$(env ROBOT_BRINGUP_PATH)/machines/$(arg machine).machine" />
+    <!-- Get the machine file -->
+    <arg name="machine" default="localhost"/>
+    <include file="$(env ROBOT_BRINGUP_PATH)/machines/$(arg machine).machine" />
 
-	<!-- Always run a multicast server with a string topic answerer for amigo-hear -->
-	<node name="hmi" pkg="hmi" type="multi_client" machine="$(arg machine)" output="screen"/>
+    <!-- Always run a multicast server with a string topic answerer for amigo-hear -->
+    <node name="hmi" pkg="hmi" type="multi_client" machine="$(arg machine)" output="screen"/>
 
+    <!-- TODO Make path dynamic -->
     <param name="/kaldi_model_path" type="string" value="/home/amigo/ros/kinetic/repos/https_/github.com/tue-robotics/speech_recognition.git/gstreamer_live_spr/online-data/models/tri2b_mmi/" />
 
-	<group ns="hmi">
+    <group ns="hmi">
 
-		<!-- QR-code / amigo-hear -->
-		<node name="string_topic_answerer" pkg="hmi" type="string_topic_answerer" output="screen"/>
+        <!-- QR-code / amigo-hear -->
+        <node name="string_topic_answerer" pkg="hmi" type="string_topic_answerer" output="screen"/>
 
-		<!-- If we are on the real robot, launch the server, otherwise a dummy -->
-        <!-- bridge to windows -->
+        <!-- If we are on the real robot, launch the server, otherwise a dummy -->
         <node name="kaldi_speech_recognition" pkg="speech_recognition" type="hmi_server_kaldi_client" machine="$(arg machine)" output="screen">
             <!-- <rosparam command="load" file="$(env ROBOT_BRINGUP_PATH)/parameters/interaction/speech_client.yaml" /> -->
         </node>
 
-	</group> <!-- ns="hmi" -->
+    </group> <!-- ns="hmi" -->
 
- </launch>
+</launch>
