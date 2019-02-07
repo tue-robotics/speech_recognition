@@ -47,8 +47,21 @@ class HMIServerKaldiClient(AbstractHMIServer):
         return None
 
 if __name__ == "__main__":
-    # Todo: Move below line somewhere else
-    os.environ['GST_PLUGIN_PATH'] = "/home/amigo/src/kaldi_speech/src/gst-plugin/"
+    # TODO Move to KaldiGstApp class definition
+    try:
+        kaldi_root = os.environ['KALDI_ROOT']
+    except:
+        sys.exit("Environment variable KALDI_ROOT unset")
+
+    try:
+        gst_plugin_path = os.environ['GST_PLUGIN_PATH']
+    except:
+        sys.exit("GST_PLUGIN_PATH is unset. Kaldi gst-plugin not in path")
+    else:
+        kaldi_gst_plugin_path = os.path.join(kaldi_root, "src/gst-plugin")
+
+        if not kaldi_gst_plugin_path in gst_plugin_path:
+            sys.exit("Kaldi gst-plugin is not in GST_PLUGIN_PATH")
 
     # Initialize gstreamer library using threads
     GObject.threads_init()
