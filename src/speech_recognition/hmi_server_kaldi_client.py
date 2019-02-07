@@ -46,3 +46,28 @@ class HMIServerKaldiClient(AbstractHMIServer):
             return HMIResult(kaldi_app.sentence, "")
         return None
 
+if __name__ == "__main__":
+    # Todo: Move below line somewhere else
+    os.environ['GST_PLUGIN_PATH'] = "/home/amigo/src/kaldi_speech/src/gst-plugin/"
+
+    # Initialize gstreamer library using threads
+    GObject.threads_init()
+    Gst.init(sys.argv)
+
+
+    rospy.init_node('hmi_server_kaldi_client')
+    c = HMIServerKaldiClient()
+
+    # # Generate some required parameters.
+    # description = ""
+    # grammar = ""
+    # target = ""
+    # is_preempt_requested = False
+    #
+    # # Run the _determine_answer function once to recognize a command (single sentence/request)
+    # c._determine_answer(description, grammar, target, is_preempt_requested)
+    #
+    # print("Finished.")
+
+    rospy.spin()
+
