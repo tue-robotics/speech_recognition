@@ -18,7 +18,7 @@
         <node name="string_topic_answerer" pkg="hmi" type="string_topic_answerer" output="screen"/>
 
         <!-- If we are on the real robot, launch the server, otherwise a dummy -->
-        <node name="kaldi_speech_recognition" pkg="speech_recognition" type="hmi_server_kaldi_client" machine="$(arg machine)" output="screen">
+        <node name="kaldi_speech_recognition" pkg="speech_recognition" type="hmi_server_kaldi_client.py" machine="$(arg machine)" output="screen">
             <!-- <rosparam command="load" file="$(env ROBOT_BRINGUP_PATH)/parameters/interaction/speech_client.yaml" /> -->
         </node>
 
