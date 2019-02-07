@@ -8,8 +8,9 @@
     <!-- Always run a multicast server with a string topic answerer for amigo-hear -->
     <node name="hmi" pkg="hmi" type="multi_client" machine="$(arg machine)" output="screen"/>
 
-    <!-- TODO Make path dynamic -->
-    <param name="/kaldi_model_path" type="string" value="/home/amigo/ros/kinetic/repos/https_/github.com/tue-robotics/speech_recognition.git/gstreamer_live_spr/online-data/models/tri2b_mmi/" />
+    <!-- Kaldi model path default to ~/data/kaldi_speech_recognition -->
+    <arg name="model_path" default="$(env HOME)/data/kaldi_speech_recognition/"/>
+    <param name="/kaldi_model_path" type="string" value="$(arg model_path)"/>
 
     <group ns="hmi">
 
