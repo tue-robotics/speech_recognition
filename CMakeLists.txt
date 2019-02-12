@@ -3,7 +3,6 @@ project(speech_recognition)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  roslint
   rospy
 )
 

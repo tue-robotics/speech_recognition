@@ -19,7 +19,6 @@
   <depend>kaldi</depend>
   <depend>python-future</depend>
   <depend>python-gi</depend>
-  <depend>roslint</depend>
   <depend>rospy</depend>
 
 </package>
