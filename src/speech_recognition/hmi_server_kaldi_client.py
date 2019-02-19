@@ -1,20 +1,16 @@
-#! /usr/bin/env python
-#
-# ROS Node and HMI Client of Kaldi Gstreamer App
-
-# System imports
-import os
-import sys
-
 # Gstreamer imports
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GLib, GObject, Gst
-from speech_recognition.kaldi_gstreamer_app import KaldiGstApp
+from gi.repository import GObject, Gst
 
 # ROS imports
 import rospy
+
+# TU/e Robotics
 from hmi import AbstractHMIServer, HMIResult
+
+# Speech recognition
+from .kaldi_gstreamer_app import KaldiGstApp
 
 
 class HMIServerKaldiClient(AbstractHMIServer):
@@ -35,8 +31,15 @@ class HMIServerKaldiClient(AbstractHMIServer):
         self._kaldi_app = None
 
     def _determine_answer(self, description, grammar, target, is_preempt_requested):
-        """Method override to start speech recognition upon receiving a query
-        from the HMI server"""
+        """
+        Method override to start speech recognition upon receiving a query
+        from the HMI server
+
+        :param description: (str) description of the HMI request
+        :param grammar: (str) grammar that should be used
+        :param target: (str) target that should be obtained from the grammar
+        :param is_preempt_requested: (callable) checks whether a preempt is requested by the hmi client
+        """
         # Todo: Take in grammar and target and compose the HCLG.fst (speech recognition graph) through a different
         #   class or whatever, before initialising the KaldiGstApp
 
@@ -45,7 +48,7 @@ class HMIServerKaldiClient(AbstractHMIServer):
         bus.add_signal_watch()
         bus.connect("message::eos", self._on_message)
 
-        while not self._kaldi_app.sentence and not rospy.is_shutdown():
+        while not self._kaldi_app.sentence and not rospy.is_shutdown() and not is_preempt_requested():
             rospy.logdebug("No sentence received so far...")
             rospy.sleep(0.2)
 
@@ -58,40 +61,14 @@ class HMIServerKaldiClient(AbstractHMIServer):
         return None
 
     def _on_message(self, bus, message):
+        """ Callback for gstreamer pipeline bus message. Sets the gstreamer pipeline state to NULL and sets the
+        kaldi app to None
+
+        :param bus:
+        :param message:
+        """
         rospy.logdebug("Stopping gstreamer pipeline")
         self._kaldi_app.pipeline.set_state(Gst.State.NULL)
         rospy.logdebug("Setting kaldi app to None")
         self._kaldi_app = None
         rospy.logdebug("Gstreamer pipeline stopped successfully")
-
-
-if __name__ == "__main__":
-    # TODO Move to KaldiGstApp class definition
-    try:
-        kaldi_root = os.environ['KALDI_ROOT']
-    except:
-        sys.exit("Environment variable KALDI_ROOT unset")
-
-    try:
-        gst_plugin_path = os.environ['GST_PLUGIN_PATH']
-    except:
-        sys.exit("GST_PLUGIN_PATH is unset. Kaldi gst-plugin not in path")
-    else:
-        kaldi_gst_plugin_path = os.path.join(kaldi_root, "src/gst-plugin")
-
-        if not kaldi_gst_plugin_path in gst_plugin_path:
-            sys.exit("Kaldi gst-plugin is not in GST_PLUGIN_PATH")
-
-    # Initialize gstreamer library using threads
-    GObject.threads_init()
-    Gst.init(sys.argv)
-
-    # Start the rosnode and create the HMI Server/Kaldi Client
-    rospy.init_node('hmi_server_kaldi_client')
-    rospy.loginfo("Creating HMIServerKaldiClient")
-    c = HMIServerKaldiClient()
-
-    # Run the GLib main loop. This makes sure the messages on the bus are handled, which is required for neatly stopping
-    # gstreamer
-    rospy.loginfo("Starting GLib main loop")
-    GLib.MainLoop().run()

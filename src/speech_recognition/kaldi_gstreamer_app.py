@@ -1,12 +1,8 @@
-#!/usr/bin/env python
-
 # Make python 2/3 compatible
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-from builtins import *
 
-import sys
-import argparse
+# System imports
 import os
 
 # Gstreamer imports
@@ -14,11 +10,8 @@ import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import GObject, Gst
 
-# ROS imports
-import rospy
-
-# Import classes
-from speech_recognition.gstreamer_app import GstApp
+# Speech recognition
+from .gstreamer_app import GstApp
 
 
 class KaldiGstApp(GstApp):
@@ -66,24 +59,8 @@ class KaldiGstApp(GstApp):
         # recognized due to, e.g., too much noise or talking in the background):
         if word == "<#s>":                              # Silence
             self.sentence = self.pub_str
-            rospy.loginfo(self.sentence)
             self.pub_str = ""
         elif self.pub_str == "":                        # No spaces at start of new sentence
             self.pub_str += word
         else:
             self.pub_str += " " + word
-
-
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser(description="ROS Publisher for Gstreamer-Kaldi plugin.")
-#     parser.add_argument("model", type=str, help='Model path')
-#     args = parser.parse_args()
-#
-#     # Initialize gstreamer library using threads
-#     GObject.threads_init()
-#     Gst.init(sys.argv)
-#
-#     rospy.init_node('gstreamer_kaldi_stream', anonymous=True)
-#     app = KaldiGstApp(args.model)
-#
-#     rospy.spin()

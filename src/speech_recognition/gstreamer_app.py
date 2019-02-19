@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Make python 2/3 compatible
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
