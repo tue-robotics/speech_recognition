@@ -126,3 +126,5 @@ echo
 # Validate lang directory
 utils/validate_lang.pl $lang_ # Note; this actually does report errors,
 
+# Make graphs
+utils/mkgraph.sh data/lang_test exp/tri2a exp/tri2a/graph
