@@ -51,6 +51,8 @@ pos_dep_phones=true
 # based on various criteria(currently just speaker's accent)
 selected=${DATA_ROOT}/selected
 
+tmplang_=data/lang_test
+lang_=data/lang
 # The user of this script could change some of the above parameters. Example:
 # /bin/bash run.sh --pos-dep-phones false
 . utils/parse_options.sh || exit 1
@@ -82,4 +84,45 @@ utils/prepare_lang.sh --position-dependent-phones $pos_dep_phones \
 # Prepare G.fst and data/{train,test} directories
 local/voxforge_format_data.sh || exit 1
 
+cp $tmplang_/G.fst $lang_/
+
+echo
+echo -e "\e[35m\e[1m==== Checking FSTs (L.fst, L_disambig.fst, G.fst) ====\e[0m"
+echo
+
+# Checking that G.fst is determinizable.
+echo "Check if G.fst is determinizable"
+fstdeterminize $lang_/G.fst /dev/null || echo "Error determinizing G."
+echo
+
+# Checking that L_disambig.fst is determinizable.
+echo "Check if L_disambig.fst is determinizable"
+fstdeterminize $lang_/L_disambig.fst /dev/null || echo "Error determinizing L."
+echo
+
+# Checking that L_disambig.G is determinizable
+echo "Check if L_disambig times G is determinizable "
+fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
+   fstdeterminize > /dev/null || echo "Error determinizing L_disambig * G"
+echo
+
+# Checking that G is stochastic [note, it wouldn't be for an Arpa]
+echo "Check if G.fst is stochastic (it wouldn't be for an Arpa)"
+fstisstochastic $lang_/G.fst || echo "Error: G is not stochastic"
+echo
+
+# Checking that LG is stochastic:
+echo "Check if LG is stochastic"
+fsttablecompose $lang_/L.fst $lang_/G.fst | \
+   fstisstochastic || echo "Error: LG is not stochastic."
+echo
+
+# Checking that L_disambig.G is stochastic:
+echo "Check if L_disambig * G is stochastic"
+fsttablecompose $lang_/L_disambig.fst $lang_/G.fst | \
+   fstisstochastic || echo "Error: L_disambig * G is not stochastic."
+echo
+
+# Validate lang directory
+utils/validate_lang.pl $lang_ # Note; this actually does report errors,
 
