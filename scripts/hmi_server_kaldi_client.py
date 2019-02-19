@@ -40,7 +40,9 @@ class HMIServerKaldiClient(AbstractHMIServer):
 
         if kaldi_app.sentence:
             # Todo: Find something that completely kills Gstreamer, below line only pauses
-            kaldi_app.pipeline.set_state(Gst.State.PAUSED)
+            print "Stopping pipeline"
+            kaldi_app.pipeline.set_state(Gst.State.NULL)
+            print "Pipeline stopped..."
 
             print(kaldi_app.sentence)
             return HMIResult(kaldi_app.sentence, "")
