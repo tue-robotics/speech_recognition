@@ -18,6 +18,13 @@ for key, value in rules.iteritems():
             if not conjunct.is_variable:
                 words.add(conjunct.name)
 
+words = [word.upper() + "\n" for word in list(words)]
+
+with open("corpus.txt", "w") as f:
+    for word in words:
+        f.write(word)
+
+
 
 print(words)
 
