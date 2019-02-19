@@ -70,12 +70,12 @@ lang_=data/lang
 # Initial normalization of the data
 #local/voxforge_data_prep.sh --nspk_test ${nspk_test} ${selected} || exit 1
 
-# Prepare ARPA LM and vocabulary using SRILM
-local/voxforge_prepare_lm.sh --order ${lm_order} || exit 1
-
 # Prepare the lexicon and various phone lists
 # Pronunciations for OOV words are obtained using a pre-trained Sequitur model
 local/voxforge_prepare_dict.sh || exit 1
+
+# Prepare ARPA LM and vocabulary using SRILM
+local/voxforge_prepare_lm.sh --order ${lm_order} || exit 1
 
 # Prepare data/lang and data/local/lang directories
 utils/prepare_lang.sh --position-dependent-phones $pos_dep_phones \
