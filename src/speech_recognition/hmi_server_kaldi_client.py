@@ -1,3 +1,6 @@
+# System imports
+import os
+
 # Gstreamer imports
 import gi
 gi.require_version('Gst', '1.0')
@@ -29,6 +32,20 @@ class HMIServerKaldiClient(AbstractHMIServer):
         self.model_path = rospy.get_param("/kaldi_model_path")
 
         self._kaldi_app = None
+
+        # Check Kaldi environment variables
+        kaldi_root = os.environ.get("KALDI_ROOT", None)
+        if kaldi_root is None:
+            raise Exception("Environment variable KALDI_ROOT is not set")
+
+        gst_plugin_path = os.environ.get("GST_PLUGIN_PATH", None)
+        if gst_plugin_path is None:
+            raise Exception("Environment variable GST_PLUGIN_PATH is not set")
+
+        kaldi_gst_plugin_path = os.path.join(kaldi_root, "src/gst-plugin")
+        if kaldi_gst_plugin_path not in gst_plugin_path:
+            raise Exception("Kaldi gst plugin path {} not in gst plugin path {}".format(kaldi_gst_plugin_path,
+                                                                                        gst_plugin_path))
 
     def _determine_answer(self, description, grammar, target, is_preempt_requested):
         """

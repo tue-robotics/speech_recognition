@@ -12,8 +12,7 @@
 
     <!-- Kaldi model path default to ~/data/kaldi_speech_recognition -->
     <arg name="model_path" default="$(env HOME)/data/kaldi_speech_recognition/"/>
-    <param name="/kaldi_model_path" type="string" value="/home/amigo/ros/kinetic/system/src/speech_recognition/gstreamer_live_spr/online-data/models/tri2b_mmi/"/>
-    <!--<param name="/kaldi_model_path" type="string" value="$(arg model_path)"/>-->
+    <param name="/kaldi_model_path" type="string" value="$(arg model_path)"/>
 
     <group ns="hmi">
 
