@@ -2,13 +2,14 @@
 #
 # ROS Node and HMI Client of Kaldi Gstreamer App
 
-import sys
+# System imports
 import os
+import sys
 
 # Gstreamer imports
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst
+from gi.repository import GLib, GObject, Gst
 from speech_recognition.kaldi_gstreamer_app import KaldiGstApp
 
 # ROS imports
@@ -32,21 +33,38 @@ class HMIServerKaldiClient(AbstractHMIServer):
         # Todo: Take in grammar and target and compose the HCLG.fst (speech recognition graph) through a different
         #   class or whatever, before initialising the KaldiGstApp
 
-        kaldi_app = KaldiGstApp(self.model_path)
+        self._kaldi_app = KaldiGstApp(self.model_path)
+        bus = self._kaldi_app.pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect("message::eos", self._on_message)
 
-        while not kaldi_app.sentence and not rospy.is_shutdown():
+        while not self._kaldi_app.sentence and not rospy.is_shutdown():
             print("No sentence received so far...")
             rospy.sleep(1)
 
-        if kaldi_app.sentence:
+        if self._kaldi_app.sentence:
             # Todo: Find something that completely kills Gstreamer, below line only pauses
+            result_str = self._kaldi_app.sentence
             print "Stopping pipeline"
-            kaldi_app.pipeline.set_state(Gst.State.NULL)
+            self._kaldi_app.pipeline.send_event(Gst.Event.new_eos())
             print "Pipeline stopped..."
 
-            print(kaldi_app.sentence)
-            return HMIResult(kaldi_app.sentence, "")
+            print(result_str)
+            return HMIResult(result_str, "")
         return None
+
+    def _on_message(self, bus, message):
+        t = message.type
+        if t == Gst.MessageType.EOS:
+            print("Received EOS")
+        with open("/tmp/on_message", "w") as f:
+            f.write("Yeehah")
+        rospy.loginfo("Received message")
+        rospy.loginfo("Stopping gstreamer pipeline")
+        self._kaldi_app.pipeline.set_state(Gst.State.NULL)
+        self._kaldi_app = None
+        rospy.loginfo("Gstreamer pipeline stopped successfully")
+
 
 if __name__ == "__main__":
     # TODO Move to KaldiGstApp class definition
@@ -73,6 +91,8 @@ if __name__ == "__main__":
     rospy.init_node('hmi_server_kaldi_client')
     c = HMIServerKaldiClient()
 
+    GLib.MainLoop().run()
+
     # # Generate some required parameters.
     # description = ""
     # grammar = ""
@@ -84,5 +104,4 @@ if __name__ == "__main__":
     #
     # print("Finished.")
 
-    rospy.spin()
-
+    # rospy.spin()
