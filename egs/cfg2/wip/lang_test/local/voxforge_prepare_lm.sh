@@ -50,7 +50,7 @@ if [ -z $loc ]; then
   fi
 fi
 
-ngram-count -order $order -write-vocab $locdata/vocab-full.txt -wbdiscount \
+ngram-count -order $order -wbdiscount \
   -text $loctmp/corpus.txt -lm $locdata/lm.arpa
 
 echo "*** Finished building the LM model!"
