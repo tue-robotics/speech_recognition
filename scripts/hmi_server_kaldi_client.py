@@ -21,7 +21,7 @@ class HMIServerKaldiClient(AbstractHMIServer):
     def __init__(self):
         """Class constructor that initializes the parent AbstractHMIServer class
         and gets parameters from ROS parameter server"""
-        AbstractHMIServer.__init__(rospy.get_name())
+        super(HMIServerKaldiClient, self).__init__(rospy.get_name())
 
         # Get the kaldi model path from ROS Parameter server
         self.model_path = rospy.get_param("/kaldi_model_path")

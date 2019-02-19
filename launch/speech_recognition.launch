@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="status_output" default="screen">
+    <arg name="status_output" default="screen"/>
 
     <!-- Get the machine file -->
     <arg name="machine" default="localhost"/>
