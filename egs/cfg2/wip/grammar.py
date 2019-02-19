@@ -1,10 +1,15 @@
 #! /usr/bin/env python
 import sys
+import os
 from grammar_parser.cfgparser import CFGParser
 
 words = set()
 
-p = CFGParser.fromfile('current_grammar.fcfg')
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
+grammar_file_path = os.path.join(script_dir, 'current_grammar.fcfg')
+
+p = CFGParser.fromfile(grammar_file_path)
 rules = p.rules
 
 for key, value in rules.iteritems():
