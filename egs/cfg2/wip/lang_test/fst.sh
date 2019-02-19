@@ -42,7 +42,7 @@ dialects="((American)|(British)|(Australia)|(Zealand))"
 nspk_test=20
 
 # Test-time language model order
-lm_order=2
+lm_order=1
 
 # Word position dependent phones?
 pos_dep_phones=true
@@ -59,14 +59,14 @@ selected=${DATA_ROOT}/selected
 
 # Select a subset of the data to use
 # WARNING: the destination directory will be deleted if it already exists!
-local/voxforge_select.sh --dialect $dialects \
-  ${DATA_ROOT}/extracted ${selected} || exit 1
+#local/voxforge_select.sh --dialect $dialects \
+#  ${DATA_ROOT}/extracted ${selected} || exit 1
 
 # Mapping the anonymous speakers to unique IDs
-local/voxforge_map_anonymous.sh ${selected} || exit 1
+#local/voxforge_map_anonymous.sh ${selected} || exit 1
 
 # Initial normalization of the data
-local/voxforge_data_prep.sh --nspk_test ${nspk_test} ${selected} || exit 1
+#local/voxforge_data_prep.sh --nspk_test ${nspk_test} ${selected} || exit 1
 
 # Prepare ARPA LM and vocabulary using SRILM
 local/voxforge_prepare_lm.sh --order ${lm_order} || exit 1
