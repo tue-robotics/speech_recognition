@@ -1,0 +1,40 @@
+#! /usr/bin/env python
+#
+# ROS Node and HMI Client of Kaldi Gstreamer App
+
+# System imports
+import sys
+
+# Gstreamer imports
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import GLib, GObject, Gst
+
+# ROS imports
+import rospy
+
+# Speech recognition
+from speech_recognition.hmi_server_kaldi_client import HMIServerKaldiClient
+
+
+if __name__ == "__main__":
+
+    # Initialize gstreamer library using threads
+    GObject.threads_init()
+    Gst.init(sys.argv)
+
+    # Start the rosnode and create the HMI Server/Kaldi Client
+    rospy.init_node('hmi_server_kaldi_client')
+    rospy.loginfo("Creating HMIServerKaldiClient")
+    c = HMIServerKaldiClient()
+
+    # Run the GLib main loop. This makes sure the messages on the bus are handled, which is required for neatly stopping
+    # gstreamer
+    rospy.loginfo("Starting GLib main loop")
+    try:
+        GLib.MainLoop().run()
+    except KeyboardInterrupt:
+        pass
+
+    # Signal rospy to shutdown to cleanly destruct the HMI server and action servers therein
+    rospy.signal_shutdown("Main loop is done")
