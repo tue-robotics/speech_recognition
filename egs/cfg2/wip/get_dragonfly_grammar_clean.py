@@ -5,7 +5,6 @@ import sys
 import os
 from Queue import Queue
 from compiler.ast import flatten
-from dragonfly import Alternative, Sequence, Literal, Grammar, Rule, Optional, Repetition
 from grammar_parser.cfgparser import CFGParser
 
 FORMAT = '%(asctime)s %(module)s [%(levelname)s] %(message)s'
