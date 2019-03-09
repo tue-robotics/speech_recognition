@@ -33,3 +33,16 @@ echo -e "\e[35m\e[1m Creating docker $IMAGE_NAME \e[0m"
 docker build --build-arg BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} --build-arg \
 COMMIT="$TRAVIS_COMMIT" --build-arg PULL_REQUEST="$TRAVIS_PULL_REQUEST" -t $IMAGE_NAME .
 
+# push the new Docker image to the Docker registry only after acceptance of pull request
+if [ $TRAVIS_PULL_REQUEST == "false" ]
+then
+    # authenticate with the Docker Hub registry
+    docker login -u="$DOCKER_HUB_USERNAME" -p="$DOCKER_HUB_PASSWORD"
+
+    echo -e "\e[35m\e[1m docker push $IMAGE_NAME \e[0m"
+    docker push $IMAGE_NAME
+
+    echo -e "\e[35m\e[1m Succeeded, see: \e[0m"
+    docker images
+fi
+
