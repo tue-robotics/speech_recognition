@@ -6,5 +6,4 @@ services:
     - docker
 
 script:
-    - ci/build-docker-image.bash
-    - ci/push-docker-image.bash
+    - ci/build-and-push-docker-image.bash
