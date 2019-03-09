@@ -1,9 +1,0 @@
-0 1 GRAB
-1 2 DET
-2 3 ENT
-3
-3 4 AND
-4 5 NAV
-5 6 DET
-6 7 LOC
-7
