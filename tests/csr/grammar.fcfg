@@ -1,0 +1,53 @@
+T[{actions : <A>}] -> VP[A]
+T[{actions : <A1, A2>}] -> VP[A1] and VP[A2]
+T[{actions : <A1, A2, A3>}] -> VP[A1] VP[A2] and VP[A3]
+
+
+
+# Grabbing
+V_GRAB -> grab | grasp | fetch
+VP[action: "grab", entity: E] -> V_GRAB the ENTITIES[E]
+
+# Navigation
+V_NAV -> navigate to | go to
+VP[action: "navigate-to", entity: LOC] -> V_NAV the LOCATIONS[LOC]
+
+LOCATIONS[{id: "livingroom"}] -> living room
+LOCATIONS[{id: "kitchen"}] -> kitchen
+LOCATIONS[{id: "hallway"}] -> hallway
+LOCATIONS[{id: "corridor"}] -> corridor
+
+
+ENTITIES[{id: "coke"}] -> coke
+ENTITIES[{id: "fanta"}] -> fanta
+ENTITIES[{id: "oj"}] -> orange juice
+
+
+VP["action": "answer-question"] -> answer a question
+VP["action": "answer-question"] -> answer the question
+VP["action": "answer-question"] -> answer his question
+VP["action": "answer-question"] -> answer her question
+
+V_PLACE -> put | place
+V_BRING -> give | bring | hand | deliver | take | carry | transport
+
+VP["action" : "bring", "to" : L] -> V_PLACE SMALL_OBJECT_SPEC[X] on the LOCATIONS[L]
+VP["action" : "bring", "to" : L] -> V_PLACE SMALL_OBJECT_SPEC[X] in the LOCATIONS[L]
+
+SMALL_OBJECT_SPEC[{ "type" : X }] -> DET SMALL_OBJECT[X]
+
+SMALL_OBJECT[{id: "coke"}] -> coke
+
+DET -> the | a
+
+# Sentence speakup
+V_SAY -> tell | say | speak
+VP["action": "say", "sentence": "ROBOT_NAME"] -> V_SAY your name
+VP["action": "say", "sentence": "TIME"] -> V_SAY the time | V_SAY what time it is | V_SAY what time is it
+VP["action": "say", "sentence": "my team is tech united"] -> V_SAY the name of your team
+VP["action": "say", "sentence": "DAY_OF_MONTH"] -> V_SAY the day of the month
+VP["action": "say", "sentence": "DAY_OF_WEEK"] -> V_SAY the day of the week
+VP["action": "say", "sentence": "TODAY"] -> V_SAY what day is today | V_SAY me what day it is | V_SAY the date
+VP["action": "say", "sentence": "TOMORROW"] -> V_SAY what day is tomorrow
+
+VP["action" : "bring", "entity" : X, "to" : Y ] -> V_BRING DET ENTITIES[X] to DET LOCATIONS[Y]

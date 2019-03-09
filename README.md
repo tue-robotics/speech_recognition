@@ -22,5 +22,14 @@ Upon completion, the last 4 lines displayed must be
 
 ==== Execution completed ====
 ```
+
+To test, run the following two commands:
+```
+roslaunch speech_recognition speech_recognition.launch model_path:="/home/amigo/ros/kinetic/system/src/speech_recognition/gstreamer_live_spr/online-data/models/tri2b_mmi/"
+```
+```
+rosrun hmi test_query -s hmi/kaldi_speech_recognition --grammar "T -> yes | no" T
+```
+
 ## TODO
 1. Complete data preparation tools for the stored datasets
