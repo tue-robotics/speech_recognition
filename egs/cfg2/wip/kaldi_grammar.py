@@ -20,7 +20,7 @@ class KaldiGrammar:
 
         self.target = target
 
-    def get_rule_element(self, depth=0):
+    def get_rule_element(self, target, depth=0):
         """
         Extracts the grammar rules, defined within the grammar file
 
@@ -29,15 +29,15 @@ class KaldiGrammar:
         """
         RulesList = {}
         # print(depth)
-        if self.target not in self.parser.rules:
-            raise Exception("Target {} not in parser rules".format(self.target))
+        if target not in self.parser.rules:
+            raise Exception("Target {} not in parser rules".format(target))
 
         # If already present in RULES, return it
-        if self.target in RulesList:
-            return RulesList[self.target]
+        if target in RulesList:
+            return RulesList[target]
 
         # Get the rule
-        rule = self.parser.rules[self.target]
+        rule = self.parser.rules[target]
 
         # Iterate over all options
         option_alternative_list = []
@@ -53,7 +53,7 @@ class KaldiGrammar:
 
                 # If variable: go one level deeper
                 if conj.is_variable:
-                    result = get_rule_element(conj.name, self.parser, depth + 1)
+                    result = self.get_rule_element(conj.name, depth + 1)
                     if result:
                         conjunctions_list.append(result)
                 else:
@@ -67,11 +67,11 @@ class KaldiGrammar:
                 option_alternative_list.append(tuple(conjunctions_list))
 
         if len(option_alternative_list) == 1:
-            RulesList[self.target] = option_alternative_list[0]
+            RulesList[target] = option_alternative_list[0]
         else:
-            RulesList[self.target] = option_alternative_list
+            RulesList[target] = option_alternative_list
 
-        return RulesList[self.target]
+        return RulesList[target]
 
     def get_words(self):
         """
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     target = sys.argv[2]
 
     kaldi_gr = KaldiGrammar(grammar_file, target)
-    tree = kaldi_gr.get_rule_element()
+    tree = kaldi_gr.get_rule_element(target)
     pprint.pprint(tree)
 
     # # Get random sentence from the grammar
