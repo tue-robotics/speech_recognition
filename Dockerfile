@@ -7,17 +7,19 @@ FROM tueroboticsamigo/kaldi:latest
 
 # Build time arguments and their default values
 ARG CI=false
-ARG BRANCH=
-ARG COMMIT=
+ARG BRANCH=master
 ARG PULL_REQUEST=false
-
-ENV CI=$CI \
-    BRANCH=$BRANCH \
-    PULL_REQUEST=$PULL_REQUEST \
-    COMMIT=$COMMIT
+ARG COMMIT=
 
 # Update the image and install basic packages
 RUN sudo apt-get update -qq && \
+    # Set the CI args in the container as docker currently provides no method to
+    # remove the environment variables
+    # NOTE: The following exports will exist only in this container
+    export CI=$CI && \
+    export BRANCH=$BRANCH && \
+    export PULL_REQUEST=$PULL_REQUEST && \
+    export COMMIT=$COMMIT && \
     # Make tue-env available to the intermediate image
     # This step needs to be executed at every RUN step
     source ~/.bashrc && \
@@ -27,6 +29,4 @@ RUN sudo apt-get update -qq && \
     "$TUE_ENV_DIR"/system/src/speech_recognition/ci/install-package.bash && \
     # Build the ROS package and perform unit tests
     "$TUE_ENV_DIR"/system/src/speech_recognition/ci/build-package.bash
-
-
 
