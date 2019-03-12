@@ -19,10 +19,12 @@ then
     This build can be reproduced locally using the following commands:
 
     tue-get install docker
-    ~/.tue/ci/install-package.sh --package=${PACKAGE} --branch=${BRANCH} --commit=${COMMIT} --pullrequest=${PULL_REQUEST}
-    ~/.tue/ci/build-package.sh --package=${PACKAGE}
+    tue-get install ros-speech_recognition
+    cd ~/ros/$TUE_ROS_DISTRO/system/src/speech_recognition
+    docker build --build-arg CI=$CI --build-arg BRANCH=$BRANCH \
+    --build-arg PULL_REQUEST=$PULL_REQUEST --build-arg COMMIT=$COMMIT \
+    -t tue-speech_recognition .
 
-    Optionally fix your compilation errors and re-run only the last command
     \e[0m"
 
     # Set the package to the right commit
