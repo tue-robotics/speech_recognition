@@ -25,13 +25,14 @@ else
 fi
 
 # Create tag based on branch name
-export IMAGE_NAME=tueroboticsamigo/speech_recognition:"$IMAGE_TAG"
+export IMAGE_NAME=tuerobotics/speech_recognition:"$IMAGE_TAG"
 
 echo -e "\e[35m\e[1m Creating docker $IMAGE_NAME \e[0m"
 
 # Build the Docker image (this will use the Dockerfile in the root of the repo)
 docker build --build-arg BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} --build-arg \
-COMMIT="$TRAVIS_COMMIT" --build-arg PULL_REQUEST="$TRAVIS_PULL_REQUEST" -t $IMAGE_NAME .
+COMMIT="$TRAVIS_COMMIT" --build-arg CI=$CI --build-arg \
+PULL_REQUEST="$TRAVIS_PULL_REQUEST" -t $IMAGE_NAME .
 
 # push the new Docker image to the Docker registry only after acceptance of pull request
 if [ $TRAVIS_PULL_REQUEST == "false" ]
