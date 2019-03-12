@@ -11,7 +11,7 @@
     <node name="hmi" pkg="hmi" type="multi_client" machine="$(arg machine)" output="$(arg status_output)"/>
 
     <!-- Kaldi model path default to ~/data/kaldi_speech_recognition -->
-    <arg name="model_path" default="$(env HOME)/data/kaldi_speech_recognition/"/>
+    <arg name="model_path" default="$(env HOME)/data/speech_models/model/"/>
     <param name="/kaldi_model_path" type="string" value="$(arg model_path)"/>
 
     <group ns="hmi">
