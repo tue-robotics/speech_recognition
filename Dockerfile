@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------
 
 # Set the base image to Kaldi base
-FROM tueroboticsamigo/kaldi:latest
+FROM tuerobotics/kaldi:latest
 
 # Build time arguments and their default values
 ARG CI=false
