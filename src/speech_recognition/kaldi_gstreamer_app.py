@@ -1,3 +1,7 @@
+#! /usr/bin/env python
+#
+# Kaldi Gstreamer App
+
 # Make python 2/3 compatible
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
@@ -16,7 +20,7 @@ from .gstreamer_app import GstApp
 
 class KaldiGstApp(GstApp):
     """Kaldi Gstreamer Application"""
-    def __init__(self, model_path):
+    def __init__(self, model_path, grammar):
         """Initialize a KaldiGstApp object"""
         GstApp.__init__(self)
 
@@ -24,14 +28,18 @@ class KaldiGstApp(GstApp):
         self.pub_str = ""
         self.sentence = None
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
+        self.grammar = grammar
 
         if self.asr:
             if not os.path.isdir(model_path):
-                self._error("Model (%s) not downloaded. Run run-simulated.sh first" % model_path)
+                self._error("Model (%s) not downloaded. Place the model at (%s) first" % model_path)
 
             self.asr.set_property("fst", model_path + "HCLG.fst")
-            self.asr.set_property("lda-mat", model_path + "matrix")
-            self.asr.set_property("model", model_path + "model")
+            # Add LDA matrix if it exists
+            if os.path.exists(model_path + "mat"):
+                self.asr.set_property("lda-mat", model_path + "final.mat")
+
+            self.asr.set_property("model", model_path + "final.mdl")
             self.asr.set_property("word-syms", model_path + "words.txt")
             self.asr.set_property("silence-phones", "1:2:3:4:5")
             self.asr.set_property("max-active", 4000)
