@@ -17,7 +17,6 @@
 
   <depend>grammar_parser</depend>
   <depend>hmi</depend>
-  <depend>hmi_msgs</depend>
   <depend>kaldi</depend>
   <depend>python-future</depend>
   <depend>python-gi</depend>
