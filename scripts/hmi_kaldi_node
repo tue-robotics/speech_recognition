@@ -28,6 +28,9 @@ if __name__ == "__main__":
     rospy.loginfo("Creating HMIServerKaldiClient")
     c = HMIServerKaldiClient()
 
+    # Kill Gstreamer if node is killed
+    rospy.on_shutdown(GLib.MainLoop.quit)
+
     # Run the GLib main loop. This makes sure the messages on the bus are handled, which is required for neatly stopping
     # gstreamer
     rospy.loginfo("Starting GLib main loop")
