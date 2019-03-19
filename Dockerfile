@@ -28,5 +28,12 @@ RUN sudo apt-get update -qq && \
     # Select appropriate commit when in CI with (out) PR
     "$TUE_ENV_DIR"/system/src/speech_recognition/ci/install-package.bash && \
     # Build the ROS package and perform unit tests
-    "$TUE_ENV_DIR"/system/src/speech_recognition/ci/build-package.bash
+    "$TUE_ENV_DIR"/system/src/speech_recognition/ci/build-package.bash && \
+    # Remove Kaldi source files to reduce image size
+    rm -rf "$KALDI_ROOT"/.git "$KALDI_ROOT"/windows "$KALDI_ROOT"/misc && \
+    find /opt/kaldi/src/ -type f -not -name '*.so' -delete && \
+    find /opt/kaldi/tools/ -type f \( -not -name '*.so' -and -not -name '*.so*' \) -delete && \
+    sudo apt-get clean autoclean && \
+    sudo apt-get autoremove -y && \
+    sudo rm -rf /var/lib/apt/lists/*
 
