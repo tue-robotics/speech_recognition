@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- Get the machine file -->
+	<arg name="machine" default="localhost"/>
+        <arg name="dragonfly" default="true" />
+	<include file="$(env ROBOT_BRINGUP_PATH)/machines/$(arg machine).machine" />
+
+	<!-- Always run a multicast server with a string topic answerer for amigo-hear -->
+	<node name="hmi" pkg="hmi" type="multi_client" machine="$(arg machine)" output="log"/>
+
+	<group ns="hmi">
+
+		<!-- QR-code / amigo-hear -->
+		<node name="string_topic_answerer" pkg="hmi" type="string_topic_answerer" output="log"/>
+
+		<!-- If we are on the real robot, launch the server, otherwise a dummy -->
+		<group if="$(optenv ROBOT_REAL false)">
+			<!-- bridge to windows -->
+                        <node name="dragonfly_speech_recognition" pkg="dragonfly_speech_recognition" type="hmi_server_dragonfly_client" machine="$(arg machine)" output="log" if="$(arg dragonfly)" >
+				<rosparam command="load" file="$(env ROBOT_BRINGUP_PATH)/parameters/interaction/speech_client.yaml" />
+			</node>
+                        <!-- Kaldi, when ready-->
+		</group>
+		<group unless="$(optenv ROBOT_REAL false)">
+			<!-- speech dummy -->
+			<node name="random_answerer" pkg="hmi" type="random_answerer" machine="$(arg machine)" output="log"/>
+			<node name="dragonfly_speech_recognition" pkg="hmi" type="dragonfly_restart_mock" machine="$(arg machine)" output="log"/>
+		</group>
+
+	</group> <!-- ns="hmi" -->
+
+ </launch>
