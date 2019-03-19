@@ -22,6 +22,7 @@ if __name__ == "__main__":
     # Initialize gstreamer library using threads
     GObject.threads_init()
     Gst.init(sys.argv)
+    glib_mainloop = GLib.MainLoop()
 
     # Start the rosnode and create the HMI Server/Kaldi Client
     rospy.init_node('hmi_server_kaldi_client')
@@ -29,13 +30,13 @@ if __name__ == "__main__":
     c = HMIServerKaldiClient()
 
     # Kill Gstreamer if node is killed
-    rospy.on_shutdown(GLib.MainLoop.quit)
+    rospy.on_shutdown(glib_mainloop.quit)
 
     # Run the GLib main loop. This makes sure the messages on the bus are handled, which is required for neatly stopping
     # gstreamer
     rospy.loginfo("Starting GLib main loop")
     try:
-        GLib.MainLoop().run()
+        glib_mainloop.run()
     except KeyboardInterrupt:
         pass
 
