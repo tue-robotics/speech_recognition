@@ -82,7 +82,7 @@ class KaldiGrammar:
         # Extract rules from the grammar file
         rules = self.parser.rules
 
-        # Extract words and
+        # Extract words
         words = set()
 
         for key, value in rules.iteritems():
@@ -104,6 +104,61 @@ class KaldiGrammar:
             for word in words:
                 f.write(word)
 
+    def expand_tree(self):
+        """
+        Expands the grammar tree based on the first word in the rule.
+        Used for validation of the first recognised word. 
+
+        :return: list of all possible sentences
+        """
+
+        # Extract rules from the grammar file
+        rules = self.parser.rules
+
+        sentence_list = [rules['T'].options[0].conjuncts[:]]
+
+        while sentence_list:
+            expanded = False
+            for item in sentence_list:
+                if item[0].is_variable:
+                    expanded = True
+                    break
+            if not expanded:
+                break
+
+            expanded_list = []
+            for item in sentence_list:
+                if not item:
+                    continue
+                if not item[0].is_variable:
+                    expanded_list.append(item)
+                    continue
+
+                for opt in rules[item[0].name].options:
+                    d = opt.conjuncts + item[1:]
+                    expanded_list.append(d)
+
+            sentence_list = expanded_list
+        self.print_nicely(sentence_list)
+
+    # TODO:
+    # compare the recognition with the first word in the resulting list
+    # check if the second word is variable -> expand again if needed
+    # compare the new recognition with the second word in the resulting list of sentences
+    # repeat until there are no more words
+    # add an option to skip a word if it is not a match and to check the next word
+
+    def print_nicely(self, sentence_list):
+        """
+        Prints cleanly the output of the tree traversal functions
+        
+        :param sentence_list: list of possible completions
+        """
+        for sentence in sentence_list:
+            line = [item.name for item in sentence]
+            print(" ".join(line))
+        print('')
+
 
 if __name__ == "__main__":
     import sys
@@ -115,6 +170,9 @@ if __name__ == "__main__":
     kaldi_gr = KaldiGrammar(grammar_file, target)
     tree = kaldi_gr.get_rule_element(target)
     pprint.pprint(tree)
+
+    # first_words = kaldi_gr.get_first_words()
+    # pprint.pprint(first_words)
 
     # # Get random sentence from the grammar
     # s = p.get_random_sentence('T')
