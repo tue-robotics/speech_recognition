@@ -25,7 +25,7 @@ class KaldiGrammar:
         Extracts the grammar rules, defined within the grammar file
 
         :param depth: level of depth of the grammar rule
-        :return: grammar tree
+        :return RulesList: grammar tree
         """
         RulesList = {}
         # print(depth)
@@ -75,7 +75,7 @@ class KaldiGrammar:
 
     def get_words(self):
         """
-        Extracts list with all the words, used within the grammar and
+        Extracts list with all the unique words, used within the grammar and
         create file 'corpus.txt' which is used to build 'G.fst'
         """
 
@@ -109,7 +109,7 @@ class KaldiGrammar:
         Expands the grammar tree based on the first word in the rule.
         Used for validation of the first recognised word. 
 
-        :return: list of all possible sentences
+        :return sentence_list: list of all possible sentences
         """
 
         # Extract rules from the grammar file
@@ -118,12 +118,12 @@ class KaldiGrammar:
         sentence_list = [rules['T'].options[0].conjuncts[:]]
 
         while sentence_list:
-            expanded = False
+            not_expanded = False
             for item in sentence_list:
                 if item[0].is_variable:
-                    expanded = True
+                    not_expanded = True
                     break
-            if not expanded:
+            if not not_expanded:
                 break
 
             expanded_list = []
@@ -139,13 +139,39 @@ class KaldiGrammar:
                     expanded_list.append(d)
 
             sentence_list = expanded_list
-        self.print_nicely(sentence_list)
+        # self.print_nicely(sentence_list)
+        return sentence_list
+
+    def check_word(self, recognition=''):
+        """
+        Checks if the recognised word is matching with the first element in the expanded sentences
+        As output it keeps a list of only the sentences, starting with the recognised word.
+
+        :param recognition: the recognised word
+        :return filtered_list: sentence list, filtered by its first word
+        """
+
+        initial_list = self.expand_tree()
+
+        filtered_list = []
+        for sentence in initial_list:
+            line = [item.name for item in sentence]
+            if line[0] == recognition:
+                filtered_list.append(line)
+                continue
+
+        print('Filtered list: \n')
+        for sentence in filtered_list:
+            line = [item for item in sentence]
+            print(" ".join(line))
+        print('')
+        return filtered_list
 
     # TODO:
-    # compare the recognition with the first word in the resulting list
-    # check if the second word is variable -> expand again if needed
-    # compare the new recognition with the second word in the resulting list of sentences
-    # repeat until there are no more words
+    # Autocomplete function, which:
+        # checks if the second word is variable -> expand again if needed
+        # compares the new recognition with the second word in the resulting list of sentences
+        # repeats until there are no more words
     # add an option to skip a word if it is not a match and to check the next word
 
     def print_nicely(self, sentence_list):
