@@ -5,10 +5,5 @@ language: bash
 services:
     - docker
 
-before_install:
-    - git clone http://github.com/$TRAVIS_REPO_SLUG.git $TRAVIS_REPO_SLUG
-    - cd $TRAVIS_REPO_SLUG
-    - git checkout ${TRAVIS_PULL_REQUEST_BRANCH:-${TRAVIS_BRANCH}}
-
 script:
     - ci/build-and-push-docker-image.bash
