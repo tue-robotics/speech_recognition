@@ -36,7 +36,7 @@ class KaldiGstApp(GstApp):
 
             self.asr.set_property("fst", model_path + "HCLG.fst")
             # Add LDA matrix if it exists
-            if os.path.exists(model_path + "mat"):
+            if os.path.exists(model_path + "final.mat"):
                 self.asr.set_property("lda-mat", model_path + "final.mat")
 
             self.asr.set_property("model", model_path + "final.mdl")
