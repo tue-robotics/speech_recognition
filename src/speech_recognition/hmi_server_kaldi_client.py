@@ -60,7 +60,7 @@ class HMIServerKaldiClient(AbstractHMIServer):
         # Todo: Take in grammar and target and compose the HCLG.fst (speech recognition graph) through a different
         #   class or whatever, before initialising the KaldiGstApp
 
-        self._kaldi_app = KaldiGstApp(self.model_path)
+        self._kaldi_app = KaldiGstApp(self.model_path, grammar)
         bus = self._kaldi_app.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect("message::eos", self._on_message)
