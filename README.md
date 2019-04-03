@@ -1,15 +1,24 @@
 # LASeR: Linux Automation Speech Recognition [![Build Status](https://travis-ci.org/tue-robotics/speech_recognition.svg?branch=master)](https://travis-ci.org/tue-robotics/speech_recognition)
-Speech recognition system based on [Kaldi-ASR](http://kaldi-asr.org/) toolkit. The backend library is written in C++ and has supports CUDA to build GPU accelerated models. Bash is used for most front-end operations and Python for data processing.
+Speech recognition system based on [Kaldi-ASR](http://kaldi-asr.org/) toolkit. The backend library is written in C++ and supports CUDA to build GPU accelerated models. Python is used for most front-end operations and data processing, complementing it with Bash time to time.
 
 ## Pre-requisites
-1. Installation of [Kaldi-ASR_TUE](https://github.com/tue-robotics/kaldi)
-2. Sourcing of ```setup.bash``` from [Kaldi-ASR_TUE](https://github.com/tue-robotics/kaldi) in ```.bashrc```
+1. Installation of CUDA
+2. Installation of [Kaldi-ASR_TUE](https://github.com/tue-robotics/kaldi)
+3. Sourcing of ```setup.bash``` from [Kaldi-ASR_TUE](https://github.com/tue-robotics/kaldi) in ```.bashrc```
 
 ## Installation
+### Using `tue-env`
+```
+tue-get install ros-speech_recognition
+```
+### From source
 1. Clone this repository
-2. Source ```setup.bash``` of this repository in ```.bashrc```
+2. Unzip the latest of the released models into `~/data/speech_models/model/`
+3. Install `package.xml` dependencies
+4. Add repository to `catkin` workspace
 
 ## Testing
+### Model building
 The installation can be tested by building a spoken digits recognition system:
 ```
 ./tests/digits.bash
@@ -23,9 +32,10 @@ Upon completion, the last 4 lines displayed must be
 ==== Execution completed ====
 ```
 
+### ROS Package test
 To test, run the following two commands:
 ```
-roslaunch speech_recognition speech_recognition.launch model_path:="/home/amigo/ros/kinetic/system/src/speech_recognition/gstreamer_live_spr/online-data/models/tri2b_mmi/"
+roslaunch speech_recognition kaldi_speech_recognition.launch
 ```
 ```
 rosrun hmi test_query -s hmi/kaldi_speech_recognition --grammar "T -> yes | no" T
