@@ -251,6 +251,140 @@ class KaldiGrammar:
     # ----------------------------------------------------------------------------------------------------
 
 
+class SentenceNode:
+    """
+    A node in a sentence.
+    :ivar edges: Edges to the next node.
+    :ivar done: Reached the end of the sentence.
+    """
+    def __init__(self):
+        self.edges = []
+        self.done = False
+
+    # ----------------------------------------------------------------------------------------------------
+
+
+class SentenceEdge:
+    """
+    An edge in a sentence.
+    :ivar word: The word to be understood.
+    :ivar node: Node for the remainder of the sentence.
+    """
+    def __init__(self, word):
+        self.word = word
+        self.node = SentenceNode()
+
+    # ----------------------------------------------------------------------------------------------------
+
+
+def expand_tree(rules):
+    """
+    Expands the grammar tree based on the first word in the rule.
+    Used for validation of the first recognised word.
+
+    :param rules: Extracted rules from the grammar file.
+    :return: The root of the expanded tree.
+    :rtype: SentenceNode
+    """
+
+    root_node = SentenceNode()
+
+    sentence_list = [opt.conjuncts[:] for opt in rules['T'].options]
+
+    work_list = [(root_node, sentence_list)]
+    while work_list:
+        node, unexpanded_list = work_list.pop()
+        expanded = expand_sentences(unexpanded_list, rules)
+        prefix_dict = {}
+        for item in expanded:
+            successors = prefix_dict.get(item[0].name)
+            if successors:
+                successors.append(item[1:])
+            else:
+                prefix_dict[item[0].name] = [item[1:]]
+        for word, unexpanded in prefix_dict.items():
+            edge = SentenceEdge(word)
+            node.edges.append(edge)
+
+            if any(unexpanded):
+                unexpanded = [item for item in unexpanded if item]
+                edge.node.done = True
+
+            if unexpanded:
+                work_list.append((edge.node, unexpanded))
+
+    return root_node
+
+    # ----------------------------------------------------------------------------------------------------
+
+
+def expand_sentences(sentence_list, rules):
+    """
+    Expands the grammar rules until elimination of all variables at the first position
+
+    :param sentence_list: List of grammar rules
+    :param rules: Rules of the grammar
+    :return: Expanded list
+    """
+
+    while sentence_list:
+        not_expanded = False
+        for item in sentence_list:
+            if item[0].is_variable:
+                not_expanded = True
+                break
+        if not not_expanded:
+            break
+
+        expanded_list = []
+        for item in sentence_list:
+            if not item:
+                continue
+            if not item[0].is_variable:
+                expanded_list.append(item)
+                continue
+
+            for opt in rules[item[0].name].options:
+                d = opt.conjuncts + item[1:]
+                expanded_list.append(d)
+
+        sentence_list = expanded_list
+    return sentence_list
+
+    # ----------------------------------------------------------------------------------------------------
+
+
+def print_tree(root_node):
+    """
+    Prints cleanly the output of the grammar tree
+
+    :param root_node: Root of the tree
+    """
+
+    work_list = [root_node]
+    node_numbers = {}
+    next_free_number = 1
+
+    while work_list:
+        node = work_list.pop()
+        number = node_numbers.get(node)
+        if not number:
+            node_numbers[node] = next_free_number
+            number = next_free_number
+            next_free_number += 1
+        print('{}:'.format(number))
+        for edge in node.edges:
+            number = node_numbers.get(edge.node)
+            if not number:
+                node_numbers[edge.node] = next_free_number
+                edge_number = next_free_number
+                next_free_number += 1
+            print('   {} -> {}'.format(edge.word, number))
+            work_list.append(edge.node)
+
+    # ----------------------------------------------------------------------------------------------------
+
+
 if __name__ == "__main__":
     import sys
     import pprint
