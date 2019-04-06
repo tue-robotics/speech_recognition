@@ -10,13 +10,13 @@ import shutil
 from grammar_parser.cfgparser import CFGParser
 
 
-class KaldiGrammar:
+class Grammar:
     """
     Class KaldiGrammar uses as input a grammar file with extension '.fcfg' and has two functions:
     get_rule_element: extracts the defined grammar rules
     get_words: extracts the unique words and creates 'corpus.txt' which is used to build 'G.fst'
     """
-    def __init__(self, grammar_file_string, target, model_path):
+    def __init__(self, model_path, grammar_file_string, target):
 
         if os.path.exists(grammar_file_string):
             self.parser = CFGParser.fromfile(grammar_file_string)
@@ -37,8 +37,10 @@ class KaldiGrammar:
 
             os.mkdir(self.model_path_tmp)
 
+        # Executing these methods in the constructor
+        self.get_words_()
 
-    def get_words(self):
+    def get_words_(self):
         """
         Extracts list with all the unique words, used within the grammar and
         create file 'corpus.txt' which is used to build 'G.fst'
