@@ -198,42 +198,42 @@ class KaldiGrammar:
 
     # ----------------------------------------------------------------------------------------------------
 
-    def expand_tree(self):
-        """
-        Expands the grammar tree based on the first word in the rule.
-        Used for validation of the first recognised word. 
-
-        :return sentence_list: list of all possible sentences
-        """
-
-        # Extract rules from the grammar file
-        rules = self.parser.rules
-
-        sentence_list = [rules['T'].options[0].conjuncts[:]]
-
-        while sentence_list:
-            not_expanded = False
-            for item in sentence_list:
-                if item[0].is_variable:
-                    not_expanded = True
-                    break
-            if not not_expanded:
-                break
-
-            expanded_list = []
-            for item in sentence_list:
-                if not item:
-                    continue
-                if not item[0].is_variable:
-                    expanded_list.append(item)
-                    continue
-
-                for opt in rules[item[0].name].options:
-                    d = opt.conjuncts + item[1:]
-                    expanded_list.append(d)
-
-            sentence_list = expanded_list
-        return sentence_list
+    # def expand_tree(self):
+    #     """
+    #     Expands the grammar tree based on the first word in the rule.
+    #     Used for validation of the first recognised word.
+    #
+    #     :return sentence_list: list of all possible sentences
+    #     """
+    #
+    #     # Extract rules from the grammar file
+    #     rules = self.parser.rules
+    #
+    #     sentence_list = [rules['T'].options[0].conjuncts[:]]
+    #
+    #     while sentence_list:
+    #         not_expanded = False
+    #         for item in sentence_list:
+    #             if item[0].is_variable:
+    #                 not_expanded = True
+    #                 break
+    #         if not not_expanded:
+    #             break
+    #
+    #         expanded_list = []
+    #         for item in sentence_list:
+    #             if not item:
+    #                 continue
+    #             if not item[0].is_variable:
+    #                 expanded_list.append(item)
+    #                 continue
+    #
+    #             for opt in rules[item[0].name].options:
+    #                 d = opt.conjuncts + item[1:]
+    #                 expanded_list.append(d)
+    #
+    #         sentence_list = expanded_list
+    #     return sentence_list
 
     # ----------------------------------------------------------------------------------------------------
 
@@ -249,6 +249,16 @@ class KaldiGrammar:
         print('')
 
     # ----------------------------------------------------------------------------------------------------
+
+    def expand_tree(self):
+        """
+        Expands the grammar tree based on the words in the grammar rules.
+
+        :return: tree of sentence nodes
+        """
+        # Extract rules from the grammar file
+        rules = self.parser.rules
+        return expand_tree(rules)
 
 
 class SentenceNode:
@@ -279,14 +289,12 @@ class SentenceEdge:
 
 def expand_tree(rules):
     """
-    Expands the grammar tree based on the first word in the rule.
-    Used for validation of the first recognised word.
+    Expands the grammar tree based on the words in the grammar rules.
 
     :param rules: Extracted rules from the grammar file.
     :return: The root of the expanded tree.
     :rtype: SentenceNode
     """
-
     root_node = SentenceNode()
 
     sentence_list = [opt.conjuncts[:] for opt in rules['T'].options]
@@ -295,23 +303,35 @@ def expand_tree(rules):
     while work_list:
         node, unexpanded_list = work_list.pop()
         expanded = expand_sentences(unexpanded_list, rules)
+
+        # collects alternatives on common prefixes and stores successor sentences
         prefix_dict = {}
         for item in expanded:
+            # stores the expanded successor sentence in existing entry
             successors = prefix_dict.get(item[0].name)
             if successors:
                 successors.append(item[1:])
             else:
+                # stores the expanded successor sentence found a non-existing prefix
                 prefix_dict[item[0].name] = [item[1:]]
+
+        # iterate over the collected prefixes and make a new edge for the words
         for word, unexpanded in prefix_dict.items():
             edge = SentenceEdge(word)
             node.edges.append(edge)
 
-            if any(unexpanded):
-                unexpanded = [item for item in unexpanded if item]
-                edge.node.done = True
+            # record finding finished sentences and throw them away
+            non_empty_successors = []
+            done = False
+            for item in unexpanded:
+                if item:
+                    non_empty_successors.append(item)
+                else:
+                    done = True
 
-            if unexpanded:
-                work_list.append((edge.node, unexpanded))
+            edge.node.done = done
+            if non_empty_successors:
+                work_list.append((edge.node, non_empty_successors))
 
     return root_node
 
@@ -328,8 +348,14 @@ def expand_sentences(sentence_list, rules):
     """
 
     while sentence_list:
+        # decide if we need to expand anything
         not_expanded = False
         for item in sentence_list:
+            # need to remove all empty alternatives
+            if not item:
+                not_expanded = True
+                break
+            # found an alternative, that needs further expansion
             if item[0].is_variable:
                 not_expanded = True
                 break
@@ -372,14 +398,18 @@ def print_tree(root_node):
             node_numbers[node] = next_free_number
             number = next_free_number
             next_free_number += 1
-        print('{}:'.format(number))
+        if node.done:
+            done_text = '                    done'
+        else:
+            done_text = ''
+        print('Node {}:{}'.format(number, done_text))
         for edge in node.edges:
             number = node_numbers.get(edge.node)
             if not number:
                 node_numbers[edge.node] = next_free_number
                 edge_number = next_free_number
                 next_free_number += 1
-            print('   {} -> {}'.format(edge.word, number))
+            print('   {} -> Node {}'.format(edge.word, edge_number))
             work_list.append(edge.node)
 
     # ----------------------------------------------------------------------------------------------------
