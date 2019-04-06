@@ -28,13 +28,23 @@ if __name__ == "__main__":
     rospy.loginfo("Creating HMIServerKaldiClient")
     c = HMIServerKaldiClient()
 
+    # GLib.MainLoop must be initialized after the HMI Client as ActionLib calls
+    # are blocking
+    glib_loop = GLib.MainLoop()
+
+    # Kill Gstreamer if node is killed
+    rospy.on_shutdown(glib_loop.quit)
+
     # Run the GLib main loop. This makes sure the messages on the bus are handled, which is required for neatly stopping
     # gstreamer
-    rospy.loginfo("Starting GLib main loop")
+    rospy.loginfo("GLib main loop starting")
     try:
-        GLib.MainLoop().run()
+        #GLib.MainLoop().run()
+        glib_loop.run()
+        rospy.loginfo("GLib main loop exited")
     except KeyboardInterrupt:
         pass
 
     # Signal rospy to shutdown to cleanly destruct the HMI server and action servers therein
-    rospy.signal_shutdown("Main loop is done")
+    # The message can be found in the log file
+    rospy.signal_shutdown("Speech recognition client shutdown")

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="output" default="screen"/>
+
+    <!-- Always run a multicast server with a string topic answerer for amigo-hear -->
+    <node name="hmi" pkg="hmi" type="multi_client" output="$(arg output)"/>
+
+    <!-- Kaldi model path default to ~/data/kaldi_speech_recognition -->
+    <arg name="model_path" default="$(env HOME)/data/speech_models/model/"/>
+    <param name="/kaldi_model_path" type="string" value="$(arg model_path)"/>
+
+    <group ns="hmi">
+
+        <!-- QR-code / amigo-hear -->
+        <node name="string_topic_answerer" pkg="hmi" type="string_topic_answerer" output="$(arg output)"/>
+
+        <node name="kaldi_speech_recognition" pkg="speech_recognition" type="hmi_kaldi_node" output="$(arg output)">
+            <!-- <rosparam command="load" file="$(env ROBOT_BRINGUP_PATH)/parameters/interaction/speech_client.yaml" /> -->
+        </node>
+
+    </group> <!-- ns="hmi" -->
+
+</launch>

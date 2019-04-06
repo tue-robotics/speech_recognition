@@ -1,9 +1,9 @@
-sudo: required
+sudo: true
+dist: xenial
 language: bash
 
 services:
     - docker
 
 script:
-    #    - ci/travis-build.bash
-    #    - ci/travis-unittests.bash
+    - ci/build-and-push-docker-image.bash
