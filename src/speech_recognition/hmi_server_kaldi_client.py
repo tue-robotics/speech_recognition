@@ -88,4 +88,4 @@ class HMIServerKaldiClient(AbstractHMIServer):
         self._kaldi_app.pipeline.set_state(Gst.State.NULL)
         rospy.logdebug("Setting kaldi app to None")
         self._kaldi_app = None
-        rospy.logdebug("Gstreamer pipeline stopped successfully")
+        rospy.loginfo("Gstreamer pipeline stopped successfully")
