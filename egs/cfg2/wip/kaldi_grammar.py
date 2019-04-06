@@ -250,15 +250,16 @@ class KaldiGrammar:
 
     # ----------------------------------------------------------------------------------------------------
 
-    def expand_tree(self):
+    def expand_tree(self, target='T'):
         """
         Expands the grammar tree based on the words in the grammar rules.
 
+        :param target: Target rule to expand, default is 'T'.
         :return: tree of sentence nodes
         """
         # Extract rules from the grammar file
         rules = self.parser.rules
-        return expand_tree(rules)
+        return expand_tree(rules, target)
 
 
 class SentenceNode:
@@ -280,58 +281,48 @@ class SentenceEdge:
     :ivar word: The word to be understood.
     :ivar node: Node for the remainder of the sentence.
     """
-    def __init__(self, word):
+    def __init__(self, word, node):
         self.word = word
-        self.node = SentenceNode()
+        self.node = node
 
     # ----------------------------------------------------------------------------------------------------
 
 
-def expand_tree(rules):
+def expand_tree(rules, target='T'):
     """
     Expands the grammar tree based on the words in the grammar rules.
 
     :param rules: Extracted rules from the grammar file.
+    :param target: Target rule to expand, default is 'T'.
     :return: The root of the expanded tree.
     :rtype: SentenceNode
     """
-    root_node = SentenceNode()
+    available_nodes = {} # Map of set of successor rules to nodes.
+    work_list = [] # Pairs of node and rule suffixes that need further work.
 
-    sentence_list = [opt.conjuncts[:] for opt in rules['T'].options]
-
-    work_list = [(root_node, sentence_list)]
+    # Construct the initial node and the first set of suffix rules to expand further.
+    root_list = [opt.conjuncts[:] for opt in rules[target].options]
+    root_node = assign_node(root_list, available_nodes, work_list, rules)
     while work_list:
-        node, unexpanded_list = work_list.pop()
-        expanded = expand_sentences(unexpanded_list, rules)
+        node, expanded_list = work_list.pop()
 
         # collects alternatives on common prefixes and stores successor sentences
         prefix_dict = {}
-        for item in expanded:
-            # stores the expanded successor sentence in existing entry
+        for item in expanded_list:
             successors = prefix_dict.get(item[0].name)
             if successors:
+                # Store the expanded successor sentence in existing entry.
                 successors.append(item[1:])
             else:
-                # stores the expanded successor sentence found a non-existing prefix
+                # Store the expanded successor sentence found a non-existing prefix.
                 prefix_dict[item[0].name] = [item[1:]]
 
-        # iterate over the collected prefixes and make a new edge for the words
-        for word, unexpanded in prefix_dict.items():
-            edge = SentenceEdge(word)
+        # Iterate over the collected prefixes and make a new edge for the words.
+        for word, successors in prefix_dict.items():
+            # Find the node to jump to after recognizing 'word'.
+            nextnode = assign_node(successors, available_nodes, work_list, rules)
+            edge = SentenceEdge(word, nextnode)
             node.edges.append(edge)
-
-            # record finding finished sentences and throw them away
-            non_empty_successors = []
-            done = False
-            for item in unexpanded:
-                if item:
-                    non_empty_successors.append(item)
-                else:
-                    done = True
-
-            edge.node.done = done
-            if non_empty_successors:
-                work_list.append((edge.node, non_empty_successors))
 
     return root_node
 
@@ -344,24 +335,28 @@ def expand_sentences(sentence_list, rules):
 
     :param sentence_list: List of grammar rules
     :param rules: Rules of the grammar
-    :return: Expanded list
+    :return: Expanded list, an whether an end of an sentence was found.
     """
-
+    end_found = False
     while sentence_list:
         # decide if we need to expand anything
         not_expanded = False
         for item in sentence_list:
-            # need to remove all empty alternatives
+            # Need to remove all empty alternatives.
             if not item:
                 not_expanded = True
-                break
-            # found an alternative, that needs further expansion
+                end_found = True
+                continue
+
+            # Found an alternative, that needs further expansion.
             if item[0].is_variable:
                 not_expanded = True
-                break
+
+        # All first enries are words already, done!
         if not not_expanded:
             break
 
+        # Expand variables at the first entry.
         expanded_list = []
         for item in sentence_list:
             if not item:
@@ -375,9 +370,62 @@ def expand_sentences(sentence_list, rules):
                 expanded_list.append(d)
 
         sentence_list = expanded_list
-    return sentence_list
+
+    return end_found, sentence_list
 
     # ----------------------------------------------------------------------------------------------------
+
+
+def stringify_suffixes(expanded_list):
+    """
+    Convert the current rule suffixes to string form.
+
+    :param expanded_list: List of rule suffixes to convert.
+    :return: Set of suffixes, after converting each to a string.
+    """
+    sentence_set = set()
+    for sentence in expanded_list:
+        sentence_text = " ".join(conjunct.name for conjunct in sentence)
+        sentence_set.add(sentence_text)
+    return sentence_set
+
+
+def assign_node(sentence_list, available_nodes, work_list, rules):
+    """
+    For a given list of rule suffixes, find or add a node, and update the work list if necessary.
+
+    :param sentence_list: List of rule suffixes to find or add a node for.
+    :type  sentence_list: List of rule alternatives (a list of conjuncts, partly expanded to words,
+            in particular, the first conjuct shou d not be a variable).
+
+    :param available_nodes: Known set of rule sufixes and their associated nodes. May be updated.
+    :type  available_nodes: Dict of str to SentenceNode
+
+    :param work_list: List or rule suffixes that need further processing. May be updated.
+    :type  work_list: List of pairs (node, rule suffixes).
+
+    :param rules: Rules of the grammar.
+
+    :return: Node associated with the provided sentence_list.
+    """
+    end_found, sentence_list = expand_sentences(sentence_list, rules)
+    sentence_set = stringify_suffixes(sentence_list)
+    sentence_set = frozenset(sentence_set)
+    node = available_nodes.get(sentence_set)
+    if node is None:
+        node = SentenceNode()
+        node.done = end_found
+        available_nodes[sentence_set] = node
+
+        non_empty_sentences = []
+        for sentence in sentence_list:
+            if sentence:
+                non_empty_sentences.append(sentence)
+            else:
+                node.done = True
+
+        work_list.append((node, non_empty_sentences))
+    return node
 
 
 def print_tree(root_node):
@@ -389,6 +437,7 @@ def print_tree(root_node):
 
     work_list = [root_node]
     node_numbers = {}
+    printed_numbers = set()
     next_free_number = 1
 
     while work_list:
@@ -398,19 +447,75 @@ def print_tree(root_node):
             node_numbers[node] = next_free_number
             number = next_free_number
             next_free_number += 1
+        else:
+            if number in printed_numbers:
+                continue
+
+        # Print the node.
         if node.done:
             done_text = '                    done'
         else:
             done_text = ''
         print('Node {}:{}'.format(number, done_text))
+        printed_numbers.add(number)
+
+        # Print its edges.
         for edge in node.edges:
             number = node_numbers.get(edge.node)
             if not number:
                 node_numbers[edge.node] = next_free_number
-                edge_number = next_free_number
+                number = next_free_number
                 next_free_number += 1
             print('   {} -> Node {}'.format(edge.word, edge_number))
             work_list.append(edge.node)
+
+    # ----------------------------------------------------------------------------------------------------
+
+def print_graphviz(root_node):
+    """
+    Prints Graphviz input of the tree.
+
+    :param root_node: Root of the tree
+    """
+
+    work_list = [root_node]
+    node_numbers = {}
+    printed_numbers = set()
+    next_free_number = 1
+
+    print("digraph G {")
+    while work_list:
+        node = work_list.pop()
+        number = node_numbers.get(node)
+        if not number:
+            node_numbers[node] = next_free_number
+            number = next_free_number
+            next_free_number += 1
+        else:
+            if number in printed_numbers:
+                continue
+
+        # Print the node.
+        if node.done:
+            shape = "box"
+        else:
+            shape = "ellipse"
+        node_text = "node{}".format(number)
+        print('{} [shape={}];'.format(node_text, shape))
+        printed_numbers.add(number)
+
+        # Print its edges.
+        for edge in node.edges:
+            number = node_numbers.get(edge.node)
+            if not number:
+                node_numbers[edge.node] = next_free_number
+                number = next_free_number
+                next_free_number += 1
+            dest_text = "node{}".format(number)
+            print("{} -> {} [label={}];".format(node_text, dest_text, edge.word))
+            work_list.append(edge.node)
+
+    print("}")
 
     # ----------------------------------------------------------------------------------------------------
 
@@ -425,10 +530,3 @@ if __name__ == "__main__":
     kaldi_gr = KaldiGrammar(grammar_file, target)
     tree = kaldi_gr.get_rule_element(target)
     pprint.pprint(tree)
-
-    # first_words = kaldi_gr.get_first_words()
-    # pprint.pprint(first_words)
-
-    # # Get random sentence from the grammar
-    # s = p.get_random_sentence('T')
-    # print(s)
