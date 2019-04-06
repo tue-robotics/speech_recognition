@@ -10,7 +10,7 @@ from gi.repository import Gst
 
 
 class GstApp:
-    """Incomplete Gstreamer Application"""
+    """Base class for Gstreamer Kaldi application"""
     def __init__(self):
         """Initialize the speech components"""
         self.type = 'Gstreamer'
@@ -33,3 +33,4 @@ class GstApp:
         """Print errors to stderr and exit program"""
         print("[{}]".format(self.type), *args, file=sys.stderr, **kwargs)
         sys.exit(1)
+
