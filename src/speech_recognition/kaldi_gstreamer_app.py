@@ -16,19 +16,20 @@ from gi.repository import Gst
 
 # Speech recognition
 from .gstreamer_app import GstApp
-
+from .kaldi_grammar import Grammar
 
 class KaldiGstApp(GstApp):
     """Kaldi Gstreamer Application"""
-    def __init__(self, model_path, grammar):
+    def __init__(self, model_path, grammar, target, ispreemt_requested):
         """Initialize a KaldiGstApp object"""
         GstApp.__init__(self)
 
         self.type = 'Kaldi-Gst-App'
+        self.grammar = Grammar(model_path, grammar, target)
+
         self.pub_str = ""
         self.sentence = None
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
-        self.grammar = grammar
 
         if self.asr:
             if not os.path.isdir(model_path):
