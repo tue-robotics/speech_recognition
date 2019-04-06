@@ -466,7 +466,7 @@ def print_tree(root_node):
                 node_numbers[edge.node] = next_free_number
                 number = next_free_number
                 next_free_number += 1
-            print('   {} -> Node {}'.format(edge.word, edge_number))
+            print('   {} -> Node {}'.format(edge.word, number))
             work_list.append(edge.node)
 
     # ----------------------------------------------------------------------------------------------------
