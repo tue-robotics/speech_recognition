@@ -2,7 +2,6 @@ T[{actions : <A>}] -> VP[A]
 #T[{actions : <A1, A2>}] -> VP[A1] and VP[A2]
 #T[{actions : <A1, A2, A3>}] -> VP[A1] VP[A2] and VP[A3]
 
-
 VP[action: "grab", entity: E] -> V_GRAB the ENTITIES[E]
 VP[action: "navigate-to", entity: LOC] -> V_NAV the LOCATIONS[LOC]
 VP[action: "answer-question"] -> answer a question
