@@ -522,11 +522,16 @@ def print_graphviz(root_node):
 
 if __name__ == "__main__":
     import sys
-    import pprint
 
-    grammar_file = sys.argv[1]
-    target = sys.argv[2]
+    try:
+        grammar_file = sys.argv[1]
+        target = sys.argv[2]
+    except:
+        grammar_file = 'current_grammar.fcfg'
+        target = 'T'
 
-    kaldi_gr = KaldiGrammar(grammar_file, target)
-    tree = kaldi_gr.get_rule_element(target)
-    pprint.pprint(tree)
+
+    k = KaldiGrammar(grammar_file, target)
+    root_node = expand_tree(k.parser.rules)
+    print_graphviz(root_node)
+
