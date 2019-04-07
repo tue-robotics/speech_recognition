@@ -34,8 +34,10 @@ class Grammar:
         if os.path.exists(grammar_file_string):
             self.parser = CFGParser.fromfile(grammar_file_string)
             self.grammar_file = grammar_file_string
+            self.grammar_string = None
         else:
             self.parser = CFGParser.fromstring(grammar_file_string)
+            self.grammar_file = None
             self.grammar_string = grammar_file_string
 
         self.target = target
