@@ -375,48 +375,6 @@ def assign_node(sentence_list, available_nodes, work_list, rules):
     return node
 
 
-def print_tree(root_node):
-    """
-    Prints cleanly the output of the grammar tree
-
-    :param root_node: Root of the tree
-    """
-
-    work_list = [root_node]
-    node_numbers = {}
-    printed_numbers = set()
-    next_free_number = 1
-
-    while work_list:
-        node = work_list.pop()
-        number = node_numbers.get(node)
-        if not number:
-            node_numbers[node] = next_free_number
-            number = next_free_number
-            next_free_number += 1
-        else:
-            if number in printed_numbers:
-                continue
-
-        # Print the node.
-        if node.done:
-            done_text = '                    done'
-        else:
-            done_text = ''
-        print('Node {}:{}'.format(number, done_text))
-        printed_numbers.add(number)
-
-        # Print its edges.
-        for edge in node.edges:
-            number = node_numbers.get(edge.node)
-            if not number:
-                node_numbers[edge.node] = next_free_number
-                number = next_free_number
-                next_free_number += 1
-            print('   {} -> Node {}'.format(edge.word, number))
-            work_list.append(edge.node)
-
-
 def print_graphviz(root_node):
     """
     Prints Graphviz input of the tree.
