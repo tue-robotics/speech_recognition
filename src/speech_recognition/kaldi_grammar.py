@@ -18,6 +18,19 @@ class Grammar:
     """
     def __init__(self, model_path, grammar_file_string, target):
 
+        self.model_path = model_path
+        self.model_path_tmp = os.path.join(self.model_path, "tmp")
+
+        # If model_path exists, create a tmp directory in it
+        if not os.path.exists(self.model_path):
+            raise Exception("Model path '{}' does not exist".format(self.model_path))
+        else:
+            if os.path.exists(self.model_path_tmp):
+                shutil.rmtree(self.model_path_tmp)
+
+            os.mkdir(self.model_path_tmp)
+
+        # Check if the grammar is a file or string and parse it
         if os.path.exists(grammar_file_string):
             self.parser = CFGParser.fromfile(grammar_file_string)
             self.grammar_file = grammar_file_string
@@ -26,16 +39,6 @@ class Grammar:
             self.grammar_string = grammar_file_string
 
         self.target = target
-        self.model_path = model_path
-        self.model_path_tmp = os.path.join(self.model_path, "tmp")
-
-        if not os.path.exists(self.model_path):
-            raise Exception("Model path '{}' does not exist".format(self.model_path))
-        else:
-            if os.path.exists(self.model_path_tmp):
-                shutil.rmtree(self.model_path_tmp)
-
-            os.mkdir(self.model_path_tmp)
 
         # Executing these methods in the constructor
         self.get_words_()
