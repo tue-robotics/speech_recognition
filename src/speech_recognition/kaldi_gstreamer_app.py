@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division,
 
 # System imports
 import os
+import subprocess
 
 # Gstreamer imports
 import gi
@@ -26,6 +27,10 @@ class KaldiGstApp(GstApp):
 
         self.type = 'Kaldi-Gst-App'
         self.grammar = Grammar(model_path, grammar, target)
+
+        # Prepare grammar and decoding graphs
+        subp_status = subprocess.call(["mkdynamicgraph.bash",
+            self.grammar.model_path, self.grammar.model_path_tmp])
 
         self.pub_str = ""
         self.sentence = None
@@ -70,6 +75,6 @@ class KaldiGstApp(GstApp):
             self.sentence = self.pub_str
             self.pub_str = ""
         elif self.pub_str == "":                        # No spaces at start of new sentence
-            self.pub_str += word
+            self.pub_str += word.lower()
         else:
-            self.pub_str += " " + word
+            self.pub_str += " " + word.lower()
