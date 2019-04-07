@@ -172,16 +172,27 @@ class Grammar:
         print('')
 
 
-    def expand_tree(self, target='T'):
+    def expand_tree(self):
         """
-        Expands the grammar tree based on the words in the grammar rules.
+        Expands the grammar tree based on the words in the grammar rules for the
+        pre-set target
 
-        :param target: Target rule to expand, default is 'T'.
         :return: tree of sentence nodes
         """
         # Extract rules from the grammar file
         rules = self.parser.rules
-        return expand_tree(rules, target)
+        return expand_tree(rules, self.target)
+
+    def parse(self, sentence):
+        """
+        Parses the input sentence to generate the semantics for the pre-set
+        target
+
+        :param sentence: The sentence to be parsed
+        :return: semantics
+        """
+        semantics = self.parser.parse(self.target, sentence)
+        return semantics
 
 
 class SentenceNode:
