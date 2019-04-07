@@ -1,16 +1,36 @@
 #! /usr/bin/env python
+
+# Make python 2/3 compatible
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import *
+
 import os
+import shutil
 from grammar_parser.cfgparser import CFGParser
 
 
-class KaldiGrammar:
+class Grammar:
     """
-    Class KaldiGrammar uses as input a grammar file with extension '.fcfg' and has two functions:
+    Class Grammar uses as input a grammar file with extension '.fcfg' and has two functions:
     get_rule_element: extracts the defined grammar rules
     get_words: extracts the unique words and creates 'corpus.txt' which is used to build 'G.fst'
     """
-    def __init__(self, grammar_file_string, target):
+    def __init__(self, model_path, grammar_file_string, target):
 
+        self.model_path = model_path
+        self.model_path_tmp = os.path.join(self.model_path, "tmp")
+
+        # If model_path exists, create a tmp directory in it
+        if not os.path.exists(self.model_path):
+            raise Exception("Model path '{}' does not exist".format(self.model_path))
+        else:
+            if os.path.exists(self.model_path_tmp):
+                shutil.rmtree(self.model_path_tmp)
+
+            os.mkdir(self.model_path_tmp)
+
+        # Check if the grammar is a file or string and parse it
         if os.path.exists(grammar_file_string):
             self.parser = CFGParser.fromfile(grammar_file_string)
             self.grammar_file = grammar_file_string
@@ -20,8 +40,11 @@ class KaldiGrammar:
 
         self.target = target
 
+        # Executing these methods in the constructor
+        self.get_words_()
 
-    def get_words(self):
+
+    def get_words_(self):
         """
         Extracts list with all the unique words, used within the grammar and
         create file 'corpus.txt' which is used to build 'G.fst'
@@ -44,13 +67,14 @@ class KaldiGrammar:
                     if not conjunct.is_variable:
                         words.add(conjunct.name)
 
-        words = [word.upper() + "\n" for word in list(words)]
-        # print(words)
+        words = [word.upper() for word in list(words)]
+        words.sort()
 
         # Create corpus.txt file and save the words list
-        with open("corpus.txt", "w") as f:
+        corpus_path = os.path.join(self.model_path_tmp, "corpus.txt")
+        with open(corpus_path, "w") as f:
             for word in words:
-                f.write(word)
+                f.write(word + "\n")
 
 
     def autocomplete(self):
