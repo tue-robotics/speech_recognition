@@ -13,7 +13,7 @@ if __name__ == "__main__":
         grammar_file = 'current_grammar.fcfg'
         target = 'T'
 
-    dummy_model_path = os.path.realpath(__file__)
+    dummy_model_path = os.path.dirname(os.path.realpath(__file__))
 
     k = Grammar(dummy_model_path, grammar_file, target)
     root_node = k.expand_tree()
