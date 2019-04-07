@@ -20,8 +20,6 @@ class KaldiGrammar:
 
         self.target = target
 
-    # ----------------------------------------------------------------------------------------------------
-
     def get_rule_element(self, target, depth=0):
         """
         Extracts the grammar rules, defined within the grammar file
@@ -75,7 +73,6 @@ class KaldiGrammar:
 
         return RulesList[target]
 
-    # ----------------------------------------------------------------------------------------------------
 
     def get_words(self):
         """
@@ -108,15 +105,14 @@ class KaldiGrammar:
             for word in words:
                 f.write(word)
 
-    # ----------------------------------------------------------------------------------------------------
-
-    # TODO:
-    # expand the full tree, not only the first words
-    # replace raw_input with the speech recognition output
-    # add an option to skip a word if it is not a match and to check the next word
 
     def autocomplete(self):
-
+        """
+        # TODO: expand the full tree, not only the first words
+        # replace raw_input with the speech recognition output
+        # add an option to skip a word if it is not a match and to check the
+        # next word
+        """
         recognised_sentence = []
 
         recognition = raw_input("Recognised word: ")
@@ -156,7 +152,6 @@ class KaldiGrammar:
         print('Recognised sentence: \n' + str(recognised_sentence))
         return recognised_sentence
 
-    # ----------------------------------------------------------------------------------------------------
 
     def check_word(self, recognition='', initial_list=[]):
         """
@@ -196,51 +191,11 @@ class KaldiGrammar:
         self.print_nicely(filtered_list)
         return filtered_list, recognised
 
-    # ----------------------------------------------------------------------------------------------------
-
-    # def expand_tree(self):
-    #     """
-    #     Expands the grammar tree based on the first word in the rule.
-    #     Used for validation of the first recognised word.
-    #
-    #     :return sentence_list: list of all possible sentences
-    #     """
-    #
-    #     # Extract rules from the grammar file
-    #     rules = self.parser.rules
-    #
-    #     sentence_list = [rules['T'].options[0].conjuncts[:]]
-    #
-    #     while sentence_list:
-    #         not_expanded = False
-    #         for item in sentence_list:
-    #             if item[0].is_variable:
-    #                 not_expanded = True
-    #                 break
-    #         if not not_expanded:
-    #             break
-    #
-    #         expanded_list = []
-    #         for item in sentence_list:
-    #             if not item:
-    #                 continue
-    #             if not item[0].is_variable:
-    #                 expanded_list.append(item)
-    #                 continue
-    #
-    #             for opt in rules[item[0].name].options:
-    #                 d = opt.conjuncts + item[1:]
-    #                 expanded_list.append(d)
-    #
-    #         sentence_list = expanded_list
-    #     return sentence_list
-
-    # ----------------------------------------------------------------------------------------------------
 
     def print_nicely(self, sentence_list):
         """
         Prints cleanly the output of the tree traversal functions
-        
+
         :param sentence_list: list of possible completions
         """
         for sentence in sentence_list:
@@ -248,7 +203,6 @@ class KaldiGrammar:
             print(" ".join(line))
         print('')
 
-    # ----------------------------------------------------------------------------------------------------
 
     def expand_tree(self, target='T'):
         """
@@ -272,8 +226,6 @@ class SentenceNode:
         self.edges = []
         self.done = False
 
-    # ----------------------------------------------------------------------------------------------------
-
 
 class SentenceEdge:
     """
@@ -284,8 +236,6 @@ class SentenceEdge:
     def __init__(self, word, node):
         self.word = word
         self.node = node
-
-    # ----------------------------------------------------------------------------------------------------
 
 
 def expand_tree(rules, target='T'):
@@ -326,7 +276,6 @@ def expand_tree(rules, target='T'):
 
     return root_node
 
-    # ----------------------------------------------------------------------------------------------------
 
 
 def expand_sentences(sentence_list, rules):
@@ -372,8 +321,6 @@ def expand_sentences(sentence_list, rules):
         sentence_list = expanded_list
 
     return end_found, sentence_list
-
-    # ----------------------------------------------------------------------------------------------------
 
 
 def stringify_suffixes(expanded_list):
@@ -469,7 +416,6 @@ def print_tree(root_node):
             print('   {} -> Node {}'.format(edge.word, number))
             work_list.append(edge.node)
 
-    # ----------------------------------------------------------------------------------------------------
 
 def print_graphviz(root_node):
     """
@@ -517,7 +463,6 @@ def print_graphviz(root_node):
 
     print("}")
 
-    # ----------------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
