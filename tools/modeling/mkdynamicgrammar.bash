@@ -15,7 +15,7 @@ then
 fi
 model_path_tmp="$2"
 
-if [ ! -f "$model_path_tmp/corpus.txt" ]
+if [ ! -f "$model_path_tmp"/corpus.txt ]
 then
     echo "corpus.txt does not exist at '$model_path_tmp/corpus.txt'"
     exit 1
@@ -31,9 +31,9 @@ then
   if uname -a | grep 64 > /dev/null
   then
     # some kind of 64 bit...
-    sdir=$KALDI_ROOT/tools/srilm/bin/i686-m64
+    sdir="$KALDI_ROOT"/tools/srilm/bin/i686-m64
   else
-    sdir=$KALDI_ROOT/tools/srilm/bin/i686
+    sdir="$KALDI_ROOT"/tools/srilm/bin/i686
   fi
 
   if [ -f $sdir/ngram-count ]
@@ -50,17 +50,19 @@ then
 fi
 
 ngram-count -order $order -wbdiscount \
-  -text $model_path_tmp/corpus.txt -lm $model_path_tmp/lm.arpa
+  -text "$model_path_tmp"/corpus.txt -lm "$model_path_tmp"/lm.arpa
 
 # -----------------------------------------------------------------------------
 # G.fst preparation
+for f in words.txt phones.txt phones L.fst
+do
+    cp -r "$model_path"/$f "$model_path_tmp"
+done
 
-cp "$model_path"/words.txt $model_path_tmp
-
-cat $model_path_tmp/lm.arpa | \
+cat "$model_path_tmp"/lm.arpa | \
   arpa2fst --disambig-symbol=#0 \
-           --read-symbol-table=$model_path_tmp/words.txt - $model_path_tmp/G.fst
+           --read-symbol-table="$model_path_tmp"/words.txt - "$model_path_tmp"/G.fst
 
-fstisstochastic $model_path_tmp/G.fst || echo "G.fst not stochastic"
+fstisstochastic "$model_path_tmp"/G.fst || echo "G.fst not stochastic"
 
 
