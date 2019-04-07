@@ -55,10 +55,7 @@ ngram-count -order $order -wbdiscount \
 # -----------------------------------------------------------------------------
 # G.fst preparation
 
-for f in words.txt
-do
-    cp -r "$model_path"/$f $model_path_tmp
-done
+cp "$model_path"/words.txt $model_path_tmp
 
 cat $model_path_tmp/lm.arpa | \
   arpa2fst --disambig-symbol=#0 \
