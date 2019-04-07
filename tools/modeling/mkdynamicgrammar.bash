@@ -54,7 +54,7 @@ ngram-count -order $order -wbdiscount \
 
 # -----------------------------------------------------------------------------
 # G.fst preparation
-for f in words.txt phones.txt phones L.fst
+for f in words.txt phones.txt phones L.fst L_disambig.fst
 do
     cp -r "$model_path"/$f "$model_path_tmp"
 done
