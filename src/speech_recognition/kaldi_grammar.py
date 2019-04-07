@@ -40,6 +40,10 @@ class Grammar:
 
         self.target = target
 
+        # Execute the following in the constructor
+        self.get_words_()
+        self.tree = self.expand_tree_()
+
 
     def get_words_(self):
         """
@@ -172,7 +176,7 @@ class Grammar:
         print('')
 
 
-    def expand_tree(self):
+    def expand_tree_(self):
         """
         Expands the grammar tree based on the words in the grammar rules for the
         pre-set target
@@ -193,6 +197,12 @@ class Grammar:
         """
         semantics = self.parser.parse(self.target, sentence)
         return semantics
+
+    def print_graphviz(self):
+        """
+        Wrapper around the print_graphviz function to print the current tree
+        """
+        print_graphviz(self.tree)
 
 
 class SentenceNode:
