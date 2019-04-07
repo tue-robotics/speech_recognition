@@ -4,6 +4,9 @@ build
 bin
 dev
 
+# Ignore pdf files created by graphviz in tests
+/tests/cfg/*.pdf
+
 # Kaldi specific files
 # Symlinks from main Kaldi repository
 steps
