@@ -20,3 +20,12 @@ if __name__ == "__main__":
 
     print_graphviz(root_node)
 
+#    test_sentence_1 = "bring me the coke"
+#    test_sentence_2 = "bring the coke to the kitchen"
+
+#    s1 = k.parse(test_sentence_1)
+#    s2 = k.parse(test_sentence_2)
+
+#    print(s1)
+#    print(s2)
+
