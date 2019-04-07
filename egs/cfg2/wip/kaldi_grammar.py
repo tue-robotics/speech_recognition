@@ -20,59 +20,6 @@ class KaldiGrammar:
 
         self.target = target
 
-    def get_rule_element(self, target, depth=0):
-        """
-        Extracts the grammar rules, defined within the grammar file
-
-        :param depth: level of depth of the grammar rule
-        :return RulesList: grammar tree
-        """
-        RulesList = {}
-        # print(depth)
-        if target not in self.parser.rules:
-            raise Exception("Target {} not in parser rules".format(target))
-
-        # If already present in RULES, return it
-        if target in RulesList:
-            return RulesList[target]
-
-        # Get the rule
-        rule = self.parser.rules[target]
-
-        # Iterate over all options
-        option_alternative_list = []
-        for opt in rule.options:
-
-            # Iterate over all conjunctions
-            conjunctions_list = []
-            for conj in opt.conjuncts:
-                # If the conjunction is already present
-                if conj.name in RulesList:
-                    conjunctions_list.append(RulesList[conj.name])
-                    continue
-
-                # If variable: go one level deeper
-                if conj.is_variable:
-                    result = self.get_rule_element(conj.name, depth + 1)
-                    if result:
-                        conjunctions_list.append(result)
-                else:
-                    # Add a new literal to the list
-                    RulesList[conj.name] = conj.name
-                    conjunctions_list.append(RulesList[conj.name])
-
-            if len(conjunctions_list) == 1:
-                option_alternative_list.append(conjunctions_list[0])
-            else:
-                option_alternative_list.append(tuple(conjunctions_list))
-
-        if len(option_alternative_list) == 1:
-            RulesList[target] = option_alternative_list[0]
-        else:
-            RulesList[target] = option_alternative_list
-
-        return RulesList[target]
-
 
     def get_words(self):
         """
