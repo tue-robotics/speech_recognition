@@ -40,9 +40,6 @@ class Grammar:
 
         self.target = target
 
-        # Executing these methods in the constructor
-        self.get_words_()
-
 
     def get_words_(self):
         """
@@ -394,22 +391,4 @@ def print_graphviz(root_node):
             work_list.append(edge.node)
 
     print("}")
-
-
-
-if __name__ == "__main__":
-    import sys
-
-    try:
-        grammar_file = sys.argv[1]
-        target = sys.argv[2]
-    except:
-        grammar_file = 'current_grammar.fcfg'
-        target = 'T'
-
-
-    k = KaldiGrammar(grammar_file, target)
-    root_node = k.expand_tree()
-
-    print_graphviz(root_node)
 
