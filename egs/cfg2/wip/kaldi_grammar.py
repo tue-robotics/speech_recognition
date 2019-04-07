@@ -194,8 +194,11 @@ def expand_tree(rules, target='T'):
     :return: The root of the expanded tree.
     :rtype: SentenceNode
     """
-    available_nodes = {} # Map of set of successor rules to nodes.
-    work_list = [] # Pairs of node and rule suffixes that need further work.
+    # Map of set of successor rules to nodes.
+    available_nodes = {}
+
+    # Pairs of node and rule suffixes that need further work.
+    work_list = []
 
     # Construct the initial node and the first set of suffix rules to expand further.
     root_list = [opt.conjuncts[:] for opt in rules[target].options]
@@ -382,6 +385,7 @@ if __name__ == "__main__":
 
 
     k = KaldiGrammar(grammar_file, target)
-    root_node = expand_tree(k.parser.rules)
+    root_node = k.expand_tree()
+
     print_graphviz(root_node)
 
