@@ -32,6 +32,9 @@ class KaldiGstApp(GstApp):
         subp_status = subprocess.call(["mkdynamicgraph.bash",
             self.grammar.model_path, self.grammar.model_path_tmp])
 
+        if subp_status == 1:
+            self._error("mkdynamicgraph failed")
+
         self.pub_str = ""
         self.sentence = None
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
