@@ -5,6 +5,7 @@ from speech_recognition.kaldi_grammar import Grammar, print_graphviz
 if __name__ == "__main__":
     import sys
     import os
+    import subprocess
 
     try:
         grammar_file = sys.argv[1]
@@ -16,9 +17,17 @@ if __name__ == "__main__":
     dummy_model_path = os.path.dirname(os.path.realpath(__file__))
 
     k = Grammar(dummy_model_path, grammar_file, target)
-    root_node = k.expand_tree()
+#    k.print_graphviz()
 
-    print_graphviz(root_node)
+#    print()
+    subprocess_exit_status = subprocess.call(["mkdynamicgrammar.bash",
+        k.model_path, k.model_path_tmp])
+
+    if subprocess_exit_status == 1:
+        raise Exception("Subprocess error")
+
+
+
 
 #    test_sentence_1 = "bring me the coke"
 #    test_sentence_2 = "bring the coke to the kitchen"
