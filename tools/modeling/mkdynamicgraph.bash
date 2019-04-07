@@ -2,19 +2,27 @@
 
 if [ -z "$1" ]
 then
-    echo "Path to corpus.txt not specified"
+    echo "Model path not specified"
     exit 1
 fi
 
-if [ ! -f "$1/corpus.txt" ]
+model_path="$1"
+
+if [ -z "$2" ]
 then
-    echo "corpus.txt does not exist at '$1/corpus.txt'"
+    echo "Path to 'corpus.txt' not specified"
+    exit 1
+fi
+model_path_tmp="$2"
+
+if [ ! -f "$model_path_tmp/corpus.txt" ]
+then
+    echo "corpus.txt does not exist at '$model_path_tmp/corpus.txt'"
     exit 1
 fi
 
-loctmp="$1"
-
-# Language model order
+# -----------------------------------------------------------------------------
+# Language model preparation
 order=1
 
 loc=$(which ngram-count)
@@ -42,5 +50,20 @@ then
 fi
 
 ngram-count -order $order -wbdiscount \
-  -text $loctmp/corpus.txt -lm $loctmp/lm.arpa
+  -text $model_path_tmp/corpus.txt -lm $model_path_tmp/lm.arpa
+
+# -----------------------------------------------------------------------------
+# G.fst preparation
+
+for f in words.txt
+do
+    cp -r "$model_path"/$f $model_path_tmp
+done
+
+cat $model_path_tmp/lm.arpa | \
+  arpa2fst --disambig-symbol=#0 \
+           --read-symbol-table=$model_path_tmp/words.txt - $model_path_tmp/G.fst
+
+fstisstochastic $model_path_tmp/G.fst || echo "G.fst not stochastic"
+
 
