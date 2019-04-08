@@ -64,5 +64,3 @@ cat "$model_path_tmp"/lm.arpa | \
            --read-symbol-table="$model_path_tmp"/words.txt - "$model_path_tmp"/G.fst
 
 fstisstochastic "$model_path_tmp"/G.fst || echo "G.fst not stochastic"
-
-
