@@ -381,7 +381,8 @@ def print_graphviz(root_node):
     printed_numbers = set()
     next_free_number = 1
 
-    print("digraph G {")
+    graphviz_dotfile_string = "digraph G {\n"
+
     while work_list:
         node = work_list.pop()
         number = node_numbers.get(node)
@@ -399,8 +400,9 @@ def print_graphviz(root_node):
         else:
             shape = "ellipse"
         node_text = "node{}".format(number)
-        print('{} [shape={}];'.format(node_text, shape))
         printed_numbers.add(number)
+        graphviz_dotfile_string += "{} [shape={}];".format(node_text, shape) \
+                + "\n"
 
         # Print its edges.
         for edge in node.edges:
@@ -410,8 +412,9 @@ def print_graphviz(root_node):
                 number = next_free_number
                 next_free_number += 1
             dest_text = "node{}".format(number)
-            print("{} -> {} [label={}];".format(node_text, dest_text, edge.word))
             work_list.append(edge.node)
+            graphviz_dotfile_string += "{} -> {} [label={}];".format(node_text,
+                    dest_text, edge.word) + "\n"
 
-    print("}")
+    graphviz_dotfile_string += "}"
 
