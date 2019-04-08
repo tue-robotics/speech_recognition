@@ -421,6 +421,6 @@ def print_graphviz(root_node, outpath):
 
     # Print and render the graphviz file at the output location
     dotfile_path_noext = os.path.join(outpath, "grammar_tree")
-    print(graphviz_dotfile_string, file=dotfile_path + ".dot")
+    print(graphviz_dotfile_string, file=dotfile_path_noext + ".dot")
     graphviz.render('dot', 'pdf', dotfile_path_noext)
 
