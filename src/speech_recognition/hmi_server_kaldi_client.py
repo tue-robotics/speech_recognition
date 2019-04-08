@@ -57,10 +57,8 @@ class HMIServerKaldiClient(AbstractHMIServer):
         :param target: (str) target that should be obtained from the grammar
         :param is_preempt_requested: (callable) checks whether a preempt is requested by the hmi client
         """
-        # Todo: Take in grammar and target and compose the HCLG.fst (speech recognition graph) through a different
-        #   class or whatever, before initialising the KaldiGstApp
+        self._kaldi_app = KaldiGstApp(self.model_path, grammar, target, is_preempt_requested)
 
-        self._kaldi_app = KaldiGstApp(self.model_path, grammar)
         bus = self._kaldi_app.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect("message::eos", self._on_message)
@@ -88,4 +86,4 @@ class HMIServerKaldiClient(AbstractHMIServer):
         self._kaldi_app.pipeline.set_state(Gst.State.NULL)
         rospy.logdebug("Setting kaldi app to None")
         self._kaldi_app = None
-        rospy.logdebug("Gstreamer pipeline stopped successfully")
+        rospy.loginfo("Gstreamer pipeline stopped successfully")

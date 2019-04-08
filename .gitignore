@@ -3,6 +3,7 @@
 build
 bin
 dev
+tmp
 
 # Kaldi specific files
 # Symlinks from main Kaldi repository

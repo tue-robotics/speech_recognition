@@ -8,27 +8,36 @@ from __future__ import (absolute_import, division,
 
 # System imports
 import os
+import subprocess
 
 # Gstreamer imports
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst
+from gi.repository import Gst
 
 # Speech recognition
 from .gstreamer_app import GstApp
-
+from .kaldi_grammar import Grammar
 
 class KaldiGstApp(GstApp):
     """Kaldi Gstreamer Application"""
-    def __init__(self, model_path, grammar):
+    def __init__(self, model_path, grammar, target, ispreemt_requested):
         """Initialize a KaldiGstApp object"""
         GstApp.__init__(self)
 
         self.type = 'Kaldi-Gst-App'
+        self.grammar = Grammar(model_path, grammar, target)
+
+        # Prepare grammar and decoding graphs
+        subp_status = subprocess.call(["mkdynamicgraph.bash",
+            self.grammar.model_path, self.grammar.model_path_tmp])
+
+        if subp_status == 1:
+            self._error("mkdynamicgraph failed")
+
         self.pub_str = ""
         self.sentence = None
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
-        self.grammar = grammar
 
         if self.asr:
             if not os.path.isdir(model_path):
@@ -69,6 +78,6 @@ class KaldiGstApp(GstApp):
             self.sentence = self.pub_str
             self.pub_str = ""
         elif self.pub_str == "":                        # No spaces at start of new sentence
-            self.pub_str += word
+            self.pub_str += word.lower()
         else:
-            self.pub_str += " " + word
+            self.pub_str += " " + word.lower()

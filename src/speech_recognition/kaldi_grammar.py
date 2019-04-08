@@ -1,27 +1,53 @@
 #! /usr/bin/env python
+
+# Make python 2/3 compatible
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import *
+
 import os
+import shutil
 from grammar_parser.cfgparser import CFGParser
+from graphviz import render
 
 
-class KaldiGrammar:
+class Grammar:
     """
-    Class KaldiGrammar uses as input a grammar file with extension '.fcfg' and has two functions:
+    Class Grammar uses as input a grammar file with extension '.fcfg' and has two functions:
     get_rule_element: extracts the defined grammar rules
     get_words: extracts the unique words and creates 'corpus.txt' which is used to build 'G.fst'
     """
-    def __init__(self, grammar_file_string, target):
+    def __init__(self, model_path, grammar_file_string, target):
 
+        self.model_path = model_path
+        self.model_path_tmp = os.path.join(self.model_path, "tmp")
+
+        # If model_path exists, create a tmp directory in it
+        if not os.path.exists(self.model_path):
+            raise Exception("Model path '{}' does not exist".format(self.model_path))
+        else:
+            if os.path.exists(self.model_path_tmp):
+                shutil.rmtree(self.model_path_tmp)
+
+            os.mkdir(self.model_path_tmp)
+
+        # Check if the grammar is a file or string and parse it
         if os.path.exists(grammar_file_string):
             self.parser = CFGParser.fromfile(grammar_file_string)
             self.grammar_file = grammar_file_string
+            self.grammar_string = None
         else:
             self.parser = CFGParser.fromstring(grammar_file_string)
+            self.grammar_file = None
             self.grammar_string = grammar_file_string
 
         self.target = target
 
+        # Execute the following in the constructor
+        self.get_words_()
+        self.tree = self.expand_tree_()
 
-    def get_words(self):
+    def get_words_(self):
         """
         Extracts list with all the unique words, used within the grammar and
         create file 'corpus.txt' which is used to build 'G.fst'
@@ -44,14 +70,14 @@ class KaldiGrammar:
                     if not conjunct.is_variable:
                         words.add(conjunct.name)
 
-        words = [word.upper() + "\n" for word in list(words)]
-        # print(words)
+        words = [word.upper() for word in list(words)]
+        words.sort()
 
         # Create corpus.txt file and save the words list
-        with open("corpus.txt", "w") as f:
+        corpus_path = os.path.join(self.model_path_tmp, "corpus.txt")
+        with open(corpus_path, "w") as f:
             for word in words:
-                f.write(word)
-
+                f.write(word + "\n")
 
     def autocomplete(self):
         """
@@ -99,7 +125,6 @@ class KaldiGrammar:
         print('Recognised sentence: \n' + str(recognised_sentence))
         return recognised_sentence
 
-
     def check_word(self, recognition='', initial_list=[]):
         """
         Checks if the recognised word is matching with the first element in the expanded sentences
@@ -138,7 +163,6 @@ class KaldiGrammar:
         self.print_nicely(filtered_list)
         return filtered_list, recognised
 
-
     def print_nicely(self, sentence_list):
         """
         Prints cleanly the output of the tree traversal functions
@@ -150,17 +174,33 @@ class KaldiGrammar:
             print(" ".join(line))
         print('')
 
-
-    def expand_tree(self, target='T'):
+    def expand_tree_(self):
         """
-        Expands the grammar tree based on the words in the grammar rules.
+        Expands the grammar tree based on the words in the grammar rules for the
+        pre-set target
 
-        :param target: Target rule to expand, default is 'T'.
         :return: tree of sentence nodes
         """
         # Extract rules from the grammar file
         rules = self.parser.rules
-        return expand_tree(rules, target)
+        return expand_tree(rules, self.target)
+
+    def parse(self, sentence):
+        """
+        Parses the input sentence to generate the semantics for the pre-set
+        target
+
+        :param sentence: The sentence to be parsed
+        :return: semantics
+        """
+        semantics = self.parser.parse(self.target, sentence)
+        return semantics
+
+    def print_graphviz(self):
+        """
+        Wrapper around the print_graphviz function to print the current tree
+        """
+        print_graphviz(self.tree, self.model_path_tmp)
 
 
 class SentenceNode:
@@ -225,7 +265,6 @@ def expand_tree(rules, target='T'):
             node.edges.append(edge)
 
     return root_node
-
 
 
 def expand_sentences(sentence_list, rules):
@@ -325,7 +364,7 @@ def assign_node(sentence_list, available_nodes, work_list, rules):
     return node
 
 
-def print_graphviz(root_node):
+def print_graphviz(root_node, outpath):
     """
     Prints Graphviz input of the tree.
 
@@ -337,7 +376,8 @@ def print_graphviz(root_node):
     printed_numbers = set()
     next_free_number = 1
 
-    print("digraph G {")
+    graphviz_dotfile_string = "digraph G {\n"
+
     while work_list:
         node = work_list.pop()
         number = node_numbers.get(node)
@@ -355,8 +395,9 @@ def print_graphviz(root_node):
         else:
             shape = "ellipse"
         node_text = "node{}".format(number)
-        print('{} [shape={}];'.format(node_text, shape))
         printed_numbers.add(number)
+        graphviz_dotfile_string += "{} [shape={}];".format(node_text, shape) \
+                + "\n"
 
         # Print its edges.
         for edge in node.edges:
@@ -366,26 +407,16 @@ def print_graphviz(root_node):
                 number = next_free_number
                 next_free_number += 1
             dest_text = "node{}".format(number)
-            print("{} -> {} [label={}];".format(node_text, dest_text, edge.word))
             work_list.append(edge.node)
+            graphviz_dotfile_string += "{} -> {} [label={}];".format(node_text,
+                    dest_text, edge.word) + "\n"
 
-    print("}")
+    graphviz_dotfile_string += "}"
 
+    # Print and render the graphviz file at the output location
+    dotfile_path = os.path.join(outpath, "grammar_tree.dot")
+    with open(dotfile_path, 'w') as f:
+        f.write(graphviz_dotfile_string)
 
-
-if __name__ == "__main__":
-    import sys
-
-    try:
-        grammar_file = sys.argv[1]
-        target = sys.argv[2]
-    except:
-        grammar_file = 'current_grammar.fcfg'
-        target = 'T'
-
-
-    k = KaldiGrammar(grammar_file, target)
-    root_node = k.expand_tree()
-
-    print_graphviz(root_node)
-
+    # Function call to graphviz.render
+    render("dot", "pdf", dotfile_path)
