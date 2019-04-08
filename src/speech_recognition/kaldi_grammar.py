@@ -47,7 +47,6 @@ class Grammar:
         self.get_words_()
         self.tree = self.expand_tree_()
 
-
     def get_words_(self):
         """
         Extracts list with all the unique words, used within the grammar and
@@ -79,7 +78,6 @@ class Grammar:
         with open(corpus_path, "w") as f:
             for word in words:
                 f.write(word + "\n")
-
 
     def autocomplete(self):
         """
@@ -127,7 +125,6 @@ class Grammar:
         print('Recognised sentence: \n' + str(recognised_sentence))
         return recognised_sentence
 
-
     def check_word(self, recognition='', initial_list=[]):
         """
         Checks if the recognised word is matching with the first element in the expanded sentences
@@ -166,7 +163,6 @@ class Grammar:
         self.print_nicely(filtered_list)
         return filtered_list, recognised
 
-
     def print_nicely(self, sentence_list):
         """
         Prints cleanly the output of the tree traversal functions
@@ -177,7 +173,6 @@ class Grammar:
             line = [item for item in sentence]
             print(" ".join(line))
         print('')
-
 
     def expand_tree_(self):
         """
@@ -270,7 +265,6 @@ def expand_tree(rules, target='T'):
             node.edges.append(edge)
 
     return root_node
-
 
 
 def expand_sentences(sentence_list, rules):
@@ -426,4 +420,3 @@ def print_graphviz(root_node, outpath):
 
     # Function call to graphviz.render
     render("dot", "pdf", dotfile_path)
-
