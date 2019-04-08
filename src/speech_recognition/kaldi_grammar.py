@@ -7,6 +7,7 @@ from builtins import *
 
 import os
 import shutil
+import graphviz
 from grammar_parser.cfgparser import CFGParser
 
 
@@ -204,7 +205,7 @@ class Grammar:
         """
         Wrapper around the print_graphviz function to print the current tree
         """
-        print_graphviz(self.tree)
+        print_graphviz(self.tree, self.model_path_tmp)
 
 
 class SentenceNode:
@@ -369,7 +370,7 @@ def assign_node(sentence_list, available_nodes, work_list, rules):
     return node
 
 
-def print_graphviz(root_node):
+def print_graphviz(root_node, outpath):
     """
     Prints Graphviz input of the tree.
 
@@ -417,4 +418,9 @@ def print_graphviz(root_node):
                     dest_text, edge.word) + "\n"
 
     graphviz_dotfile_string += "}"
+
+    # Print and render the graphviz file at the output location
+    dotfile_path_noext = os.path.join(outpath, "grammar_tree")
+    print(graphviz_dotfile_string, file=dotfile_path + ".dot")
+    graphviz.render('dot', 'pdf', dotfile_path_noext)
 
