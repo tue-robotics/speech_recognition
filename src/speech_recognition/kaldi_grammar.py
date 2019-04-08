@@ -7,8 +7,8 @@ from builtins import *
 
 import os
 import shutil
-import graphviz
 from grammar_parser.cfgparser import CFGParser
+from graphviz import render
 
 
 class Grammar:
@@ -420,7 +420,10 @@ def print_graphviz(root_node, outpath):
     graphviz_dotfile_string += "}"
 
     # Print and render the graphviz file at the output location
-    dotfile_path_noext = os.path.join(outpath, "grammar_tree")
-    print(graphviz_dotfile_string, file=dotfile_path_noext + ".dot")
-    graphviz.render('dot', 'pdf', dotfile_path_noext)
+    dotfile_path = os.path.join(outpath, "grammar_tree.dot")
+    with open(dotfile_path, 'w') as f:
+        f.write(graphviz_dotfile_string)
+
+    # Function call to graphviz.render
+    render("dot", "pdf", dotfile_path)
 
