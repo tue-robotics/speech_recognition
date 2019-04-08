@@ -6,7 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
 )
 
-catkin_add_env_hooks(setup SHELLS bash DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+catkin_add_env_hooks(setup SHELLS bash DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/env-hooks)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
