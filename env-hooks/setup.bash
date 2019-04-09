@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
 
-PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../tools/modeling${PATH:+:${PATH}}
+speech_source=$(rospack find speech_recognition)
+
+PATH="$speech_source"/tools/modeling${PATH:+:${PATH}}
 export PATH
