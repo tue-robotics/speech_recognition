@@ -96,35 +96,24 @@ class Grammar:
 
         next_edges = self.current_node.edges
 
-        if len(next_edges) > 1:
-            next_node = None
-            for edge in next_edges:
-                if edge.word == recognised_word:
-                    next_node = edge.node
-                    break
+        next_node = None
+        for edge in next_edges:
+            if edge.word == recognised_word:
+                next_node = edge.node
+                self.consecutive_mismatch = 0
+                break
 
-            if not next_node:
+        if not next_node:
+            if len(next_edges) > 1 or self.consecutive_mismatch >= self.max_consecutive_mismatch:
                 return False
             else:
-                self.recognised_sentence.append(recognised_word)
-                self.current_node = next_node
-                self.consecutive_mismatch = 0
-                return True
+                next_node = next_edges[0].node
+                recognised_word = next_edges[0].word
+                self.consecutive_mismatch += 1
 
-        else:
-            if not next_edges[0].word == recognised_word:
-                if self.consecutive_mismatch < self.max_consecutive_mismatch:
-                    self.consecutive_mismatch += 1
-                    self.recognised_sentence.append(next_edges[0].word)
-                    self.current_node = next_edges[0].node
-                    return True
-                else:
-                    return False
-            else:
-                self.recognised_sentence.append(recognised_word)
-                self.current_node = next_edges[0].node
-                self.consecutive_mismatch = 0
-                return True
+        self.recognised_sentence.append(recognised_word)
+        self.current_node = next_node
+        return True
 
     def expand_tree_(self):
         """
