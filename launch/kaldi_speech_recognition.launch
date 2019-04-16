@@ -2,7 +2,6 @@
 <launch>
 
     <arg name="output" default="screen"/>
-    <!-- Kaldi model path default to ~/data/speech_models/model/ -->
     <arg name="model_path" default="$(env HOME)/data/speech_models/model/"/>
 
     <!-- Always run a multicast server with a string topic answerer for amigo-hear -->
