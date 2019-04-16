@@ -2,13 +2,11 @@
 <launch>
 
     <arg name="output" default="screen"/>
+    <!-- Kaldi model path default to ~/data/speech_models/model/ -->
+    <arg name="model_path" default="$(env HOME)/data/speech_models/model/"/>
 
     <!-- Always run a multicast server with a string topic answerer for amigo-hear -->
     <node name="hmi" pkg="hmi" type="multi_client" output="$(arg output)"/>
-
-    <!-- Kaldi model path default to ~/data/kaldi_speech_recognition -->
-    <arg name="model_path" default="$(env HOME)/data/speech_models/model/"/>
-    <param name="/kaldi_model_path" type="string" value="$(arg model_path)"/>
 
     <group ns="hmi">
 
@@ -16,7 +14,7 @@
         <node name="string_topic_answerer" pkg="hmi" type="string_topic_answerer" output="$(arg output)"/>
 
         <node name="kaldi_speech_recognition" pkg="speech_recognition" type="hmi_kaldi_node" output="$(arg output)">
-            <!-- <rosparam command="load" file="$(env ROBOT_BRINGUP_PATH)/parameters/interaction/speech_client.yaml" /> -->
+            <param name="kaldi_model_path" type="string" value="$(arg model_path)"/>
         </node>
 
     </group> <!-- ns="hmi" -->
