@@ -37,6 +37,8 @@ class KaldiGstApp(GstApp):
 
         self.pub_str = ""
         self.sentence = None
+        self.semantics = None
+
         self.asr = Gst.ElementFactory.make("onlinegmmdecodefaster", "asr")
 
         if self.asr:
@@ -75,9 +77,6 @@ class KaldiGstApp(GstApp):
         # Publish only when a pause has been registered (might be less robust than single words when pauses are not
         # recognized due to, e.g., too much noise or talking in the background):
         if word == "<#s>":                              # Silence
-            self.sentence = self.pub_str
-            self.pub_str = ""
-        elif self.pub_str == "":                        # No spaces at start of new sentence
-            self.pub_str += word.lower()
+            self.sentence, self.semantics = self.grammar.get_results()
         else:
-            self.pub_str += " " + word.lower()
+            self.grammar.traverse(word.lower())
