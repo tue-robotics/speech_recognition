@@ -49,7 +49,7 @@ class Grammar:
         self._tree_root = self._expand_tree()
 
         # Variables used during tree traversal
-        self._recognised_sentence_ = []
+        self._recognised_sentence = []
         self._current_node = self._tree_root
         self._consecutive_recognition_mismatch = 0
 
@@ -145,6 +145,21 @@ class Grammar:
         """
         print_graphviz(self._tree_root, self.model_path_tmp)
 
+    def get_results(self):
+        """
+        Method to get the recognition results
+
+        :return: sentence
+        :return: semantics
+        """
+        sentence = ""
+        for word in self._recognised_sentence:
+            sentence += word + " "
+        sentence = sentence.rstrip()
+
+        semantics = self.parse(sentence)
+
+        return sentence, semantics
 
 class SentenceNode:
     """
