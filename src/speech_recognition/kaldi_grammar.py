@@ -42,19 +42,19 @@ class Grammar:
             self.grammar_string = grammar_file_string
 
         self.target = target
-        self.max_consecutive_mismatch = max_consecutive_mismatch
+        self._max_consecutive_mismatch = max_consecutive_mismatch
 
         # Execute the following in the constructor
-        self.get_words_()
-        self.tree_root = self.expand_tree_()
+        self._get_words()
+        self._tree_root = self._expand_tree()
 
         # Variables used during tree traversal
-        self.recognised_sentence = []
-        self.current_node = self.tree_root
-        self.consecutive_recognition_mismatch = 0
+        self._recognised_sentence_ = []
+        self._current_node = self._tree_root
+        self._consecutive_recognition_mismatch = 0
 
 
-    def get_words_(self):
+    def _get_words(self):
         """
         Extracts list with all the unique words, used within the grammar and
         create file 'corpus.txt' which is used to build 'G.fst'
@@ -94,28 +94,30 @@ class Grammar:
         # next word
         """
 
-        next_edges = self.current_node.edges
+        next_edges = self._current_node.edges
 
         next_node = None
         for edge in next_edges:
             if edge.word == recognised_word:
                 next_node = edge.node
-                self.consecutive_mismatch = 0
+                self._consecutive_mismatch = 0
                 break
 
         if not next_node:
-            if len(next_edges) > 1 or self.consecutive_mismatch >= self.max_consecutive_mismatch:
+            if len(next_edges) > 1 or self._consecutive_mismatch >= self._max_consecutive_mismatch:
+                self._current_node = self._tree_root
+                self._recognised_sentence = []
                 return False
             else:
                 next_node = next_edges[0].node
                 recognised_word = next_edges[0].word
-                self.consecutive_mismatch += 1
+                self._consecutive_mismatch += 1
 
-        self.recognised_sentence.append(recognised_word)
-        self.current_node = next_node
+        self._recognised_sentence.append(recognised_word)
+        self._current_node = next_node
         return True
 
-    def expand_tree_(self):
+    def _expand_tree(self):
         """
         Expands the grammar tree based on the words in the grammar rules for the
         pre-set target
@@ -141,7 +143,7 @@ class Grammar:
         """
         Wrapper around the print_graphviz function to print the current tree
         """
-        print_graphviz(self.tree_root, self.model_path_tmp)
+        print_graphviz(self._tree_root, self.model_path_tmp)
 
 
 class SentenceNode:
