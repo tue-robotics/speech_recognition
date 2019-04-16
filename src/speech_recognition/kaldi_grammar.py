@@ -17,7 +17,7 @@ class Grammar:
     get_rule_element: extracts the defined grammar rules
     get_words: extracts the unique words and creates 'corpus.txt' which is used to build 'G.fst'
     """
-    def __init__(self, model_path, grammar_file_string, target):
+    def __init__(self, model_path, grammar_file_string, target, max_consecutive_mismatch=2):
 
         self.model_path = model_path
         self.model_path_tmp = os.path.join(self.model_path, "tmp")
@@ -42,10 +42,17 @@ class Grammar:
             self.grammar_string = grammar_file_string
 
         self.target = target
+        self.max_consecutive_mismatch = max_consecutive_mismatch
 
         # Execute the following in the constructor
         self.get_words_()
-        self.tree = self.expand_tree_()
+        self.tree_root = self.expand_tree_()
+
+        # Variables used during tree traversal
+        self.recognised_sentence = []
+        self.current_node = self.tree_root
+        self.consecutive_recognition_mismatch = 0
+
 
     def get_words_(self):
         """
@@ -79,100 +86,45 @@ class Grammar:
             for word in words:
                 f.write(word + "\n")
 
-    def autocomplete(self):
+    def traverse(self, recognised_word):
         """
         # TODO: expand the full tree, not only the first words
         # replace raw_input with the speech recognition output
         # add an option to skip a word if it is not a match and to check the
         # next word
         """
-        recognised_sentence = []
 
-        recognition = raw_input("Recognised word: ")
-        type(recognition)
+        next_edges = self.current_node.edges
 
-        # create a filtered list, based on the recognised first word
-        initial_list, recognised = self.check_word(recognition)
-        if not recognised:
-            print('Not a match')
-        else:
-            # remove the first word from each line
-            first_word = [line.pop(0) for line in initial_list]
-            recognised_sentence.append(first_word[0])
-            sentence_list = initial_list
-
-            print('Initial filtered list: \n')
-            self.print_nicely(sentence_list)
-
-            while len(sentence_list[0]) > 0:
-                next_recognition = raw_input("Next recognised word: ")
-                type(next_recognition)
-
-                # create a filtered list, based on the next recognised word
-                new_initial_list, recognised = self.check_word(next_recognition, sentence_list)
-                if not recognised:
-                    print('Not a match')
+        if len(next_edges) > 1:
+            next_node = None
+            for edge in next_edges:
+                if edge.word == recognised_word:
+                    next_node = edge.node
                     break
-                else:
-                    # remove the first word from each line
-                    next_word = [line.pop(0) for line in new_initial_list]
-                    recognised_sentence.append(next_word[0])
-                    sentence_list = new_initial_list
 
-                    print('New filtered list: \n')
-                    self.print_nicely(sentence_list)
-
-        print('Recognised sentence: \n' + str(recognised_sentence))
-        return recognised_sentence
-
-    def check_word(self, recognition='', initial_list=[]):
-        """
-        Checks if the recognised word is matching with the first element in the expanded sentences
-        As output it keeps a list of only the sentences, starting with the recognised word.
-
-        :param recognition: the recognised word
-        :param initial_list: bla
-        :return filtered_list: sentence list, filtered by its first word
-        """
-
-        recognised = False
-
-        if len(initial_list) == 0:
-            initial_list = self.expand_tree()
-
-            filtered_list = []
-            for sentence in initial_list:
-                line = [item.name for item in sentence]
-                if line[0] == recognition:
-                    filtered_list.append(line)
-                    continue
+            if not next_node:
+                return False
+            else:
+                self.recognised_sentence.append(recognised_word)
+                self.current_node = next_node
+                self.consecutive_mismatch = 0
+                return True
 
         else:
-            filtered_list = []
-            for sentence in initial_list:
-                line = [item for item in sentence]
-                if line[0] == recognition:
-                    filtered_list.append(line)
-                    continue
-
-        if len(filtered_list) > 0:
-            recognised = True
-
-        print('Filtered list: \n')
-        print(recognised)
-        self.print_nicely(filtered_list)
-        return filtered_list, recognised
-
-    def print_nicely(self, sentence_list):
-        """
-        Prints cleanly the output of the tree traversal functions
-
-        :param sentence_list: list of possible completions
-        """
-        for sentence in sentence_list:
-            line = [item for item in sentence]
-            print(" ".join(line))
-        print('')
+            if not next_edges[0].word == recognised_word:
+                if self.consecutive_mismatch < self.max_consecutive_mismatch:
+                    self.consecutive_mismatch += 1
+                    self.recognised_sentence.append(next_edges[0].word)
+                    self.current_node = next_edges[0].node
+                    return True
+                else:
+                    return False
+            else:
+                self.recognised_sentence.append(recognised_word)
+                self.current_node = next_edges[0].node
+                self.consecutive_mismatch = 0
+                return True
 
     def expand_tree_(self):
         """
@@ -200,7 +152,7 @@ class Grammar:
         """
         Wrapper around the print_graphviz function to print the current tree
         """
-        print_graphviz(self.tree, self.model_path_tmp)
+        print_graphviz(self.tree_root, self.model_path_tmp)
 
 
 class SentenceNode:
