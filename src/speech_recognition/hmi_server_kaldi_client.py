@@ -29,7 +29,7 @@ class HMIServerKaldiClient(AbstractHMIServer):
         super(HMIServerKaldiClient, self).__init__(rospy.get_name())
 
         # Get the kaldi model path from ROS Parameter server
-        self.model_path = rospy.get_param("/kaldi_model_path")
+        self.model_path = rospy.get_param("~kaldi_model_path")
 
         self._kaldi_app = None
 
