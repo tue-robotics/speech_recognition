@@ -69,10 +69,9 @@ class HMIServerKaldiClient(AbstractHMIServer):
 
         if self._kaldi_app.sentence:
             rospy.loginfo("Kaldi returned: {}".format(self._kaldi_app.sentence))
-            result_str = self._kaldi_app.sentence
             rospy.logdebug("Sending stop event")
             self._kaldi_app.pipeline.send_event(Gst.Event.new_eos())
-            return HMIResult(result_str, "")
+            return HMIResult(self._kaldi_app.sentence, self._kaldi_app.semantics)
         return None
 
     def _on_message(self, bus, message):
