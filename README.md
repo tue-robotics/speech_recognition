@@ -41,5 +41,10 @@ roslaunch speech_recognition kaldi_speech_recognition.launch
 rosrun hmi test_query -s hmi/kaldi_speech_recognition --grammar "T -> yes | no" T
 ```
 
+### Docker interface
+To launch a docker container with access to the audio hardware, run:
+```bash
+docker run --rm -v /dev/snd:/dev/snd --privileged -it <IMAGE_NAME>
+```
 ## TODO
 1. Complete data preparation tools for the stored datasets
