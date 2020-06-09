@@ -10,6 +10,8 @@ import shutil
 from grammar_parser.cfgparser import CFGParser
 from graphviz import render
 
+import openfst_python as fst
+
 
 class Grammar:
     """
@@ -161,16 +163,35 @@ class Grammar:
 
         return sentence, semantics
 
+    def as_fst(self):
+        f = fst.Fst()
+        nodes = {node: f.add_state() for node in SentenceNode.instances}
+        for node in SentenceNode.instances:
+            for edge in node.edges:
+                f.add_arc(nodes[node],
+                          fst.Arc(1,
+                                  2,
+                                  fst.Weight(f.weight_type(), 1.0),
+                                  nodes[edge.node]))
+
+        f.set_start(nodes[SentenceNode.instances[0]])  # Root?
+        f.set_final(nodes[SentenceNode.instances[-1]])  # Must be deepest node or with most distance from start?
+        f.draw("/tmp/grammar/grammar.dot")
+
+
 class SentenceNode:
     """
     A node in a sentence.
     :ivar edges: Edges to the next node.
     :ivar done: Reached the end of the sentence.
     """
+    instances = []
+
     def __init__(self):
         self.edges = []
         self.done = False
 
+        SentenceNode.instances += [self]
 
 class SentenceEdge:
     """
@@ -178,9 +199,13 @@ class SentenceEdge:
     :ivar word: The word to be understood.
     :ivar node: Node for the remainder of the sentence.
     """
+    instances = []
+
     def __init__(self, word, node):
         self.word = word
         self.node = node
+
+        SentenceEdge.instances += [self]
 
 
 def expand_tree(rules, target='T'):
