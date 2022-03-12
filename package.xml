@@ -17,7 +17,7 @@
 
   <depend>grammar_parser</depend>
   <depend>hmi</depend>
-  <depend>python-future</depend>
+  <depend>python3-future</depend>
   <depend>python-gi</depend>
   <depend>rospy</depend>
 
